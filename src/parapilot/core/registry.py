@@ -224,11 +224,20 @@ def get_reader(filepath: str) -> str:
 
 
 def get_filter(name: str) -> dict[str, Any]:
-    """Return filter schema from registry. Raises KeyError if unknown."""
-    if name not in FILTER_REGISTRY:
-        available = sorted(FILTER_REGISTRY)
-        raise KeyError(f"Unknown filter: '{name}'. Available: {available}")
-    return FILTER_REGISTRY[name]
+    """Return filter schema from registry. Raises KeyError if unknown.
+
+    Accepts any casing: 'contour', 'Contour', 'CONTOUR' all resolve
+    to the PascalCase registry key 'Contour'.
+    """
+    if name in FILTER_REGISTRY:
+        return FILTER_REGISTRY[name]
+    # Case-insensitive fallback
+    lower = name.lower()
+    for key in FILTER_REGISTRY:
+        if key.lower() == lower:
+            return FILTER_REGISTRY[key]
+    available = sorted(FILTER_REGISTRY)
+    raise KeyError(f"Unknown filter: '{name}'. Available: {available}")
 
 
 def validate_filter_params(name: str, params: dict[str, Any]) -> dict[str, Any]:
