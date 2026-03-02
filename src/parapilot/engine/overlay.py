@@ -107,7 +107,7 @@ def get_font(size: int, style: str = "sans", bold: bool = False) -> ImageFont.Fr
     if path is not None:
         font = ImageFont.truetype(path, size)
     else:
-        font = ImageFont.load_default(size=size)
+        font = ImageFont.load_default(size=size)  # type: ignore[assignment]
 
     _font_cache[key] = font
     return font
@@ -299,7 +299,7 @@ def draw_scalar_bar(
     colors = _sample_colormap(config.colormap, bar_h)
     grad = Image.new("RGB", (1, bar_h))
     grad.putdata([colors[bar_h - 1 - i] for i in range(bar_h)])
-    grad = grad.resize((bar_w, bar_h), Image.NEAREST)
+    grad = grad.resize((bar_w, bar_h), Image.Resampling.NEAREST)
     overlay.paste(grad, (bar_x, y_top))
 
     # Border
@@ -390,12 +390,12 @@ def draw_title(
     cy = y
     if title:
         draw.text((x, cy), title, fill=theme.text_primary, font=title_font)
-        cy += title_h + gap
+        cy += int(title_h) + gap
     if subtitle:
         draw.text((x, cy), subtitle, fill=theme.text_secondary, font=sub_font)
 
     img.alpha_composite(overlay)
-    return total_h + pad * 2
+    return int(total_h) + pad * 2
 
 
 def draw_watermark(

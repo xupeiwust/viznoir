@@ -141,7 +141,6 @@ def extract_stats(
     Returns:
         Dict mapping field_name → {min, max, mean, std, components, association}.
     """
-    import vtk
 
     ds = _ensure_dataset(dataset)
     if ds is None:
@@ -209,7 +208,6 @@ def extract_data(
         Dict mapping field names to nested lists of values.
         If include_coords, also contains "x", "y", "z" keys.
     """
-    import vtk
 
     ds = _ensure_dataset(dataset)
     if ds is None:
@@ -489,7 +487,7 @@ def _get_coordinates(ds: vtk.vtkDataSet) -> np.ndarray | None:
     if points is None:
         return None
 
-    return vtk_to_numpy(points.GetData())
+    return vtk_to_numpy(points.GetData())  # type: ignore[no-any-return]
 
 
 def supported_export_formats() -> list[str]:

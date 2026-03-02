@@ -356,7 +356,7 @@ def _auto_point_size(ds: vtk.vtkDataSet) -> float:
     diag = sqrt(dx * dx + dy * dy + dz * dz)
     # Point size as fraction of diagonal (aim for ~2% of screen)
     size = max(1.0, min(20.0, spacing / diag * 500.0))
-    return round(size, 1)
+    return float(round(size, 1))
 
 
 # ======================================================================
@@ -630,12 +630,12 @@ def _first_array_name(ds: vtk.vtkDataSet) -> str | None:
     if pd and pd.GetNumberOfArrays() > 0:
         name = pd.GetArrayName(0)
         if name:
-            return name
+            return str(name)
     cd = ds.GetCellData()
     if cd and cd.GetNumberOfArrays() > 0:
         name = cd.GetArrayName(0)
         if name:
-            return name
+            return str(name)
     return None
 
 
@@ -701,4 +701,4 @@ def _auto_warp_scale(ds: vtk.vtkDataSet, field_name: str) -> float:
         return 1.0
 
     # Target: deformation ~10% of model size
-    return round(diag * 0.1 / max_disp, 4)
+    return float(round(diag * 0.1 / max_disp, 4))

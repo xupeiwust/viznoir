@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from parapilot.core.runner import VTKRunner, RunResult
+from parapilot.core.runner import RunResult, VTKRunner
 
 
 class TestDockerContainerCleanup:
@@ -29,8 +29,8 @@ class TestDockerContainerCleanup:
             patch("parapilot.core.runner.uuid") as mock_uuid,
         ):
             mock_uuid.uuid4.return_value = MagicMock(hex="abcdef123456")
-            from pathlib import Path
             import tempfile
+            from pathlib import Path
 
             with tempfile.TemporaryDirectory() as tmpdir:
                 script = Path(tmpdir) / "pipeline.py"
@@ -64,8 +64,8 @@ class TestDockerContainerCleanup:
             patch("parapilot.core.runner.uuid") as mock_uuid,
         ):
             mock_uuid.uuid4.return_value = MagicMock(hex="abcdef123456")
-            from pathlib import Path
             import tempfile
+            from pathlib import Path
 
             with tempfile.TemporaryDirectory() as tmpdir:
                 script = Path(tmpdir) / "pipeline.py"
@@ -221,7 +221,7 @@ class TestStdoutProtection:
 
         # Save original state
         orig_stdout = sys.stdout
-        orig_fd1_stat = os.fstat(1)
+        _ = os.fstat(1)
 
         try:
             _protect_stdout()

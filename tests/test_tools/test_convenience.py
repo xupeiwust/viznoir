@@ -34,7 +34,7 @@ class TestSliceImpl:
         with patch("parapilot.tools.filters.execute_pipeline", return_value=mock_result) as mock_exec:
             from parapilot.tools.filters import slice_impl
 
-            result = await slice_impl(
+            await slice_impl(
                 file_path="/data/case.vtk",
                 field_name="p",
                 runner=mock_runner,
@@ -79,7 +79,7 @@ class TestExtractStatsImpl:
         with patch("parapilot.tools.extract.execute_pipeline", return_value=data_result) as mock_exec:
             from parapilot.tools.extract import extract_stats_impl
 
-            result = await extract_stats_impl(
+            await extract_stats_impl(
                 file_path="/data/case.vtk",
                 fields=["p", "U"],
                 runner=mock_runner,

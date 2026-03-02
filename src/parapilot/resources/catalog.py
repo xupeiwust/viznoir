@@ -345,7 +345,7 @@ def register_resources(mcp: FastMCP) -> None:
                 "warp": props["warp"],
                 "streamlines": props["streamlines"],
             }
-        data["_usage"] = {  # type: ignore[assignment]
+        data["_usage"] = {
             "description": (
                 "When rendering a field, detect the physics type from the field name "
                 "and apply the recommended defaults. For unknown fields, use 'cool to warm' "
