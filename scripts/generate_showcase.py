@@ -24,7 +24,7 @@ VTK_DATA_URL = "https://raw.githubusercontent.com/pyvista/vtk-data/master/Data"
 DATA_FILES = [
     "dragon.ply",
     "head.vti",
-    "disk_out_ref_surface.vtp",
+    "office.binary.vtk",
     "carotid.vtk",
     "Armadillo.ply",
     "ironProt.vtk",
@@ -173,23 +173,47 @@ RENDERS: dict[str, str] = {
         PNG = render_to_png(clipped, cfg, cam)
     """),
 
-    # 5. CFD: disk_out_ref pressure field
-    "cfd_pressure": textwrap.dedent("""\
+    # 5. CFD: office room airflow streamlines
+    "office_flow": textwrap.dedent("""\
         import vtk
+        from parapilot.engine.filters import streamlines
         from parapilot.engine.renderer import RenderConfig, render_to_png
         from parapilot.engine.camera import CameraConfig
 
-        reader = vtk.vtkXMLPolyDataReader()
-        reader.SetFileName(DATA_DIR + '/disk_out_ref_surface.vtp')
+        reader = vtk.vtkStructuredGridReader()
+        reader.SetFileName(DATA_DIR + '/office.binary.vtk')
+        reader.ReadAllVectorsOn()
+        reader.ReadAllScalarsOn()
         reader.Update()
+        data = reader.GetOutput()
 
-        cam = CameraConfig(position=(-22.0, 24.0, 22.0), focal_point=(0, 0, 0), view_up=(0, 0, 1))
+        lines = streamlines(
+            data, array_name='vectors',
+            seed_point1=(0.5, 0.5, 0.5), seed_point2=(4.0, 4.0, 2.0),
+            num_seeds=120, integration_direction='both',
+        )
+
+        calc = vtk.vtkArrayCalculator()
+        calc.SetInputData(lines)
+        calc.AddVectorArrayName('vectors')
+        calc.SetFunction('mag(vectors)')
+        calc.SetResultArrayName('VelocityMag')
+        calc.Update()
+
+        tube = vtk.vtkTubeFilter()
+        tube.SetInputConnection(calc.GetOutputPort())
+        tube.SetRadius(0.02)
+        tube.SetNumberOfSides(8)
+        tube.CappingOn()
+        tube.Update()
+
+        cam = CameraConfig(position=(8, 8, 6), focal_point=(2.25, 2.25, 1.25), view_up=(0, 0, 1))
         cfg = RenderConfig(
             width=1920, height=1080, background=(0.04, 0.04, 0.06),
-            colormap='viridis', array_name='Pres',
-            show_scalar_bar=True, scalar_bar_title='Pressure',
+            colormap='turbo', array_name='VelocityMag',
+            show_scalar_bar=True, scalar_bar_title='Velocity (m/s)',
         )
-        PNG = render_to_png(reader.GetOutput(), cfg, cam)
+        PNG = render_to_png(tube.GetOutput(), cfg, cam)
     """),
 
     # 6. Medical: head CT axial slice
