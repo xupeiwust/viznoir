@@ -6,7 +6,9 @@ build/
 .venv/
 .env
 *.png
+*.webp
 !www/public/showcase/*.png
+!www/public/showcase/*.webp
 !www/public/og-image.png
 *.mp4
 *.gif

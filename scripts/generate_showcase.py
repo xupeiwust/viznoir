@@ -283,14 +283,18 @@ def run_render(name: str, code: str) -> bool:
         f"DATA_DIR = {str(DATA_DIR)!r}\n\n"
     )
     postamble = (
-        "\n# Save optimized 960x540\n"
+        "\n# Save optimized 960x540 (PNG + WebP)\n"
         "from PIL import Image\n"
-        f"out_path = {str(OUT_DIR)!r} + '/{name}.png'\n"
+        f"out_png = {str(OUT_DIR)!r} + '/{name}.png'\n"
+        f"out_webp = {str(OUT_DIR)!r} + '/{name}.webp'\n"
         "img = Image.open(io.BytesIO(PNG))\n"
         "resized = img.resize((960, 540), Image.LANCZOS)\n"
-        "resized.save(out_path, 'PNG', optimize=True)\n"
+        "resized.save(out_png, 'PNG', optimize=True)\n"
+        "resized.save(out_webp, 'WEBP', quality=85, method=6)\n"
         "import os\n"
-        "print(f'{os.path.getsize(out_path) // 1024}KB')\n"
+        "png_kb = os.path.getsize(out_png) // 1024\n"
+        "webp_kb = os.path.getsize(out_webp) // 1024\n"
+        "print(f'{png_kb}KB png / {webp_kb}KB webp')\n"
     )
     wrapper = preamble + code + postamble
 
