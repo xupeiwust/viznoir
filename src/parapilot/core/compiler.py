@@ -294,8 +294,8 @@ from parapilot.engine.export import inspect_dataset
 dataset = read_dataset({source_file})
 info = inspect_dataset(dataset)
 info["timesteps"] = get_timesteps({source_file})
-info["arrays"] = list_arrays(dataset)
-info["blocks"] = list_blocks(dataset)
+info["arrays"] = list_arrays({source_file})
+info["blocks"] = list_blocks({source_file})
 
 result_path = os.path.join(OUTPUT_DIR, "result.json")
 with open(result_path, "w") as f:
@@ -323,16 +323,18 @@ _cfg = RenderConfig(
     line_width={line_width},
 )
 
-if {camera_position} is not None:
+_camera_position = {camera_position}
+_camera_preset = {camera_preset}
+if _camera_position is not None:
     _cam = custom_camera(
-        position={camera_position},
+        position=_camera_position,
         focal_point={camera_focal_point},
         view_up={camera_view_up},
         zoom={camera_zoom},
         orthographic={camera_orthographic},
     )
-elif {camera_preset} is not None:
-    _cam = preset_camera({camera_preset}, dataset.GetBounds(), zoom={camera_zoom}, orthographic={camera_orthographic})
+elif _camera_preset is not None:
+    _cam = preset_camera(_camera_preset, dataset.GetBounds(), zoom={camera_zoom}, orthographic={camera_orthographic})
 else:
     _cam = None
 
@@ -430,9 +432,10 @@ else:
             show_scalar_bar={show_scalar_bar}, log_scale={log_scale},
             scalar_range={scalar_range},
         )
-        if {camera_preset} is not None:
+        _camera_preset = {camera_preset}
+        if _camera_preset is not None:
             _cam = preset_camera(
-                {camera_preset}, dataset.GetBounds(),
+                _camera_preset, dataset.GetBounds(),
                 zoom={camera_zoom}, orthographic={camera_orthographic},
             )
         else:

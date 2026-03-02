@@ -39,13 +39,18 @@ _runner = VTKRunner(config=_config)
 
 
 def _validate_file_path(file_path: str) -> str:
-    """Validate file_path is within the configured data_dir (path traversal prevention)."""
+    """Validate file_path is within the configured data_dir (path traversal prevention).
+
+    When PARAPILOT_DATA_DIR is not set (local install), any path is allowed.
+    When set (Docker), access is restricted to that directory.
+    """
     resolved = Path(file_path).resolve()
-    data_dir = _config.data_dir.resolve()
-    if not str(resolved).startswith(str(data_dir) + "/") and resolved != data_dir:
-        raise ValueError(
-            f"Access denied: '{file_path}' is outside allowed data directory '{data_dir}'"
-        )
+    if _config.data_dir is not None:
+        data_dir = _config.data_dir.resolve()
+        if not str(resolved).startswith(str(data_dir) + "/") and resolved != data_dir:
+            raise ValueError(
+                f"Access denied: '{file_path}' is outside allowed data directory '{data_dir}'"
+            )
     return str(resolved)
 
 

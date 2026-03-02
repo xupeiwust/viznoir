@@ -82,6 +82,7 @@ def clip_plane(
     origin: tuple[float, float, float],
     normal: tuple[float, float, float] = (0.0, 0.0, 1.0),
     inside_out: bool = False,
+    invert: bool | None = None,
 ) -> vtk.vtkDataObject:
     """Clip dataset with a plane.
 
@@ -90,11 +91,15 @@ def clip_plane(
         origin: Point on the plane (x, y, z).
         normal: Plane normal direction (nx, ny, nz).
         inside_out: If True, keep the half-space behind the plane.
+        invert: Alias for inside_out (registry compatibility).
 
     Returns:
         Clipped unstructured grid.
     """
     import vtk
+
+    if invert is not None:
+        inside_out = invert
 
     plane = vtk.vtkPlane()
     plane.SetOrigin(*origin)
@@ -110,8 +115,11 @@ def clip_plane(
 
 def contour(
     data: vtk.vtkDataObject,
-    array_name: str,
-    values: list[float],
+    array_name: str | None = None,
+    values: list[float] | None = None,
+    field: str | None = None,
+    association: str = "POINTS",
+    isovalues: list[float] | None = None,
 ) -> vtk.vtkDataObject:
     """Generate contour surfaces at specified values.
 
@@ -119,17 +127,33 @@ def contour(
         data: Input VTK dataset.
         array_name: Name of the scalar array to contour.
         values: List of contour values.
+        field: Alias for array_name (registry compatibility).
+        association: Array association (POINTS or CELLS).
+        isovalues: Alias for values (registry compatibility).
 
     Returns:
         Contour polydata.
     """
     import vtk
 
+    name = field or array_name
+    if name is None:
+        raise ValueError("contour requires 'field' or 'array_name'")
+    vals = isovalues or values
+    if not vals:
+        raise ValueError("contour requires 'isovalues' or 'values'")
+
+    assoc = (
+        vtk.vtkDataObject.FIELD_ASSOCIATION_CELLS
+        if association.upper() == "CELLS"
+        else vtk.vtkDataObject.FIELD_ASSOCIATION_POINTS
+    )
+
     filt = vtk.vtkContourFilter()
     filt.SetInputData(data)
-    filt.SetInputArrayToProcess(0, 0, 0, vtk.vtkDataObject.FIELD_ASSOCIATION_POINTS, array_name)
+    filt.SetInputArrayToProcess(0, 0, 0, assoc, name)
 
-    for i, val in enumerate(values):
+    for i, val in enumerate(vals):
         filt.SetValue(i, val)
 
     filt.Update()
@@ -156,10 +180,12 @@ def isosurface(
 
 def threshold(
     data: vtk.vtkDataObject,
-    array_name: str,
+    array_name: str | None = None,
     lower: float | None = None,
     upper: float | None = None,
     component: int = 0,
+    field: str | None = None,
+    method: str | None = None,
 ) -> vtk.vtkDataObject:
     """Threshold dataset by scalar range.
 
@@ -169,10 +195,16 @@ def threshold(
         lower: Lower bound (None = no lower bound).
         upper: Upper bound (None = no upper bound).
         component: Array component index for multi-component arrays.
+        field: Alias for array_name (registry compatibility).
+        method: Ignored (kept for registry compatibility).
 
     Returns:
         Thresholded unstructured grid.
     """
+    _ = method
+    array_name = field or array_name
+    if array_name is None:
+        raise ValueError("threshold requires 'field' or 'array_name'")
     import vtk
 
     filt = vtk.vtkThreshold()
@@ -305,10 +337,11 @@ def calculator(
 
 def gradient(
     data: vtk.vtkDataObject,
-    array_name: str,
+    array_name: str | None = None,
     result_name: str = "Gradient",
     compute_vorticity: bool = False,
     compute_qcriterion: bool = False,
+    field: str | None = None,
 ) -> vtk.vtkDataObject:
     """Compute gradient (and optionally vorticity/Q-criterion) of a scalar/vector field.
 
@@ -318,11 +351,16 @@ def gradient(
         result_name: Name for the gradient output array.
         compute_vorticity: Also compute vorticity (for vector inputs).
         compute_qcriterion: Also compute Q-criterion (for vector inputs).
+        field: Alias for array_name (registry compatibility).
 
     Returns:
         Dataset with gradient array added.
     """
     import vtk
+
+    array_name = field or array_name
+    if array_name is None:
+        raise ValueError("gradient requires 'field' or 'array_name'")
 
     filt = vtk.vtkGradientFilter()
     filt.SetInputData(data)
@@ -668,7 +706,7 @@ def apply_filter(
     Raises:
         ValueError: If filter_name is not recognized.
     """
-    func = _FILTER_REGISTRY.get(filter_name)
+    func = _FILTER_REGISTRY.get(filter_name.lower())
     if func is None:
         available = ", ".join(sorted(_FILTER_REGISTRY.keys()))
         msg = f"Unknown filter '{filter_name}'. Available: {available}"

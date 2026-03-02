@@ -27,7 +27,7 @@ class PVConfig:
         "auto"   — EGL if GPU available, else OSMesa.
     """
 
-    data_dir: Path = field(default_factory=lambda: Path(os.getenv("PARAPILOT_DATA_DIR", "/data")))
+    data_dir: Path | None = field(default_factory=lambda: _parse_data_dir())
     output_dir: Path = field(default_factory=lambda: Path(os.getenv("PARAPILOT_OUTPUT_DIR", "/output")))
     python_bin: str = field(
         default_factory=lambda: os.getenv("PARAPILOT_PYTHON_BIN", sys.executable)
@@ -74,6 +74,12 @@ def _parse_vtk_backend(value: str) -> Literal["egl", "osmesa", "auto"]:
     if v in ("egl", "osmesa", "auto"):
         return v  # type: ignore[return-value]
     return "auto"
+
+
+def _parse_data_dir() -> Path | None:
+    """Parse PARAPILOT_DATA_DIR — None if unset (disables path validation)."""
+    val = os.getenv("PARAPILOT_DATA_DIR")
+    return Path(val) if val else None
 
 
 def _gpu_available() -> bool:

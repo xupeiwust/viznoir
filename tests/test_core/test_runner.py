@@ -48,7 +48,12 @@ class TestDockerContainerCleanup:
     @pytest.mark.asyncio
     async def test_docker_run_includes_container_name(self) -> None:
         """docker run args must include --name parapilot_*."""
-        runner = VTKRunner(mode="docker")
+        from pathlib import Path
+
+        from parapilot.config import PVConfig
+
+        config = PVConfig(data_dir=Path("/data"))
+        runner = VTKRunner(mode="docker", config=config)
 
         captured_args: list[str] = []
 

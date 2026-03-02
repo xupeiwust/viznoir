@@ -469,6 +469,24 @@ def _get_block_names(mb: vtk.vtkMultiBlockDataSet) -> list[str]:
     return names
 
 
+def _extract_blocks(mb: vtk.vtkMultiBlockDataSet, block_names: list[str]) -> vtk.vtkDataObject:
+    """Extract named blocks from a multiblock dataset.
+
+    Returns the first matching block as a dataset, or the original if none match.
+    """
+
+    for i in range(mb.GetNumberOfBlocks()):
+        md = mb.GetMetaData(i)
+        name = md.Get(mb.NAME()) if md is not None and md.Has(mb.NAME()) else None
+        if name in block_names:
+            block = mb.GetBlock(i)
+            if block is not None:
+                return block
+    # Fallback: return first leaf
+    leaf = _first_leaf(mb)
+    return leaf if leaf is not None else mb
+
+
 def _first_leaf(mb: vtk.vtkMultiBlockDataSet) -> vtk.vtkDataSet | None:
     """Get the first non-None leaf dataset from a multiblock."""
     import vtk
@@ -494,18 +512,29 @@ def _first_leaf(mb: vtk.vtkMultiBlockDataSet) -> vtk.vtkDataSet | None:
 def read_dataset(
     file_path: str | Path,
     timestep: float | None = None,
+    blocks: list[str] | None = None,
+    source_files: list[str] | None = None,
 ) -> vtk.vtkDataObject:
     """Read a VTK dataset from file.
 
     Args:
         file_path: Path to any supported VTK file format.
         timestep: Target time value for transient data.
+        blocks: Block names to extract from multiblock datasets (OpenFOAM).
+            If None, returns the full dataset (extracting first leaf for multiblock).
+        source_files: Ignored here; used by animation templates for multi-file iteration.
 
     Returns:
         VTK data object.
     """
+    _ = source_files  # used only in animation code generation
     reader = DataReader(file_path)
-    return reader.read(timestep)
+    dataset = reader.read(timestep)
+
+    if blocks and isinstance(dataset, vtk.vtkMultiBlockDataSet):
+        dataset = _extract_blocks(dataset, blocks)
+
+    return dataset
 
 
 def get_timesteps(file_path: str | Path) -> list[float]:

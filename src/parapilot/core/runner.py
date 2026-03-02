@@ -201,7 +201,11 @@ class VTKRunner:
         args.extend([
             "-v", f"{tmpdir}:/work:ro",
             "-v", f"{output_dir}:/output",
-            "-v", f"{self.config.data_dir.resolve()}:/data:ro",
+            *(
+                ["-v", f"{self.config.data_dir.resolve()}:/data:ro"]
+                if self.config.data_dir is not None
+                else []
+            ),
             "-e", "PARAPILOT_OUTPUT_DIR=/output",
             "-e", "PARAPILOT_DATA_DIR=/data",
         ])

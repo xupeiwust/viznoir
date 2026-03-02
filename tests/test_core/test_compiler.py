@@ -242,7 +242,8 @@ class TestCompilerRender:
 class TestCompilerCamera:
     def test_camera_preset(self, compiler):
         script = _compile_render(compiler, field="p", camera=CameraDef(preset="top"))
-        assert "preset_camera('top'" in script
+        assert "_camera_preset = 'top'" in script
+        assert "preset_camera(_camera_preset" in script
 
     def test_camera_custom_position(self, compiler):
         script = _compile_render(
@@ -255,7 +256,8 @@ class TestCompilerCamera:
             ),
         )
         assert "custom_camera(" in script
-        assert "position=[1.0, 2.0, 3.0]" in script
+        assert "_camera_position = [1.0, 2.0, 3.0]" in script
+        assert "position=_camera_position" in script
         assert "focal_point=[0.0, 0.0, 0.0]" in script
 
     def test_camera_zoom(self, compiler):
@@ -339,9 +341,9 @@ class TestCompilerInspect:
     def test_inspect_script(self, compiler):
         script = compiler.compile_inspect("/data/case.vtk")
         assert "inspect_dataset(dataset)" in script
-        assert "get_timesteps" in script
-        assert "list_arrays" in script
-        assert "list_blocks" in script
+        assert "get_timesteps('/data/case.vtk')" in script
+        assert "list_arrays('/data/case.vtk')" in script
+        assert "list_blocks('/data/case.vtk')" in script
         assert "result.json" in script
 
     def test_inspect_no_paraview(self, compiler):
