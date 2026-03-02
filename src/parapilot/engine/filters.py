@@ -230,12 +230,17 @@ def threshold(
 
 def streamlines(
     data: vtk.vtkDataObject,
-    array_name: str,
-    seed_point1: tuple[float, float, float],
-    seed_point2: tuple[float, float, float],
+    array_name: str | None = None,
+    seed_point1: tuple[float, float, float] = (0, 0, 0),
+    seed_point2: tuple[float, float, float] = (1, 0, 0),
     num_seeds: int = 25,
     max_length: float = 0.0,
     integration_direction: str = "both",
+    # Registry aliases (from ScriptCompiler)
+    vectors: list[str] | None = None,
+    seed_type: str | None = None,
+    seed_resolution: int | None = None,
+    direction: str | None = None,
 ) -> vtk.vtkDataObject:
     """Generate streamlines from a line source seed.
 
@@ -247,11 +252,25 @@ def streamlines(
         num_seeds: Number of seed points along the line.
         max_length: Maximum streamline length. 0 = auto (10x dataset diagonal).
         integration_direction: "forward", "backward", or "both".
+        vectors: Registry alias — ['POINTS', 'field_name'], extracts array_name.
+        seed_type: Registry alias — ignored (always 'Line').
+        seed_resolution: Registry alias for num_seeds.
+        direction: Registry alias for integration_direction.
 
     Returns:
         Streamline polydata.
     """
     import vtk
+
+    # Resolve registry aliases
+    if vectors is not None and array_name is None:
+        array_name = vectors[-1] if isinstance(vectors, list) else vectors
+    if array_name is None:
+        raise ValueError("streamlines requires array_name or vectors parameter")
+    if seed_resolution is not None and num_seeds == 25:
+        num_seeds = seed_resolution
+    if direction is not None and integration_direction == "both":
+        integration_direction = direction.lower()
 
     line = vtk.vtkLineSource()
     line.SetPoint1(*seed_point1)

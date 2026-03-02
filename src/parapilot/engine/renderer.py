@@ -48,7 +48,9 @@ _RENDER_WINDOW: vtk.vtkRenderWindow | None = None
 def _get_render_window(width: int, height: int) -> vtk.vtkRenderWindow:
     """Get or create a reusable offscreen render window.
 
-    Auto-detects EGL (GPU) vs OSMesa (CPU) based on environment.
+    Uses vtkRenderWindow() which respects VTK_DEFAULT_OPENGL_WINDOW env var
+    to select EGL (GPU) or OSMesa (CPU) backend via VTK's factory mechanism.
+    Direct vtkEGLRenderWindow() construction causes SIGSEGV in pip-installed VTK.
     """
     import vtk
 
@@ -57,19 +59,6 @@ def _get_render_window(width: int, height: int) -> vtk.vtkRenderWindow:
     if _RENDER_WINDOW is not None:
         _RENDER_WINDOW.SetSize(width, height)
         return _RENDER_WINDOW
-
-    # Try EGL first (GPU accelerated), fallback to offscreen
-    use_egl = os.environ.get("VTK_DEFAULT_OPENGL_WINDOW", "").lower() == "vtkeglrenderwindow"
-
-    if use_egl:
-        try:
-            rw = vtk.vtkEGLRenderWindow()
-            rw.SetOffScreenRendering(True)
-            rw.SetSize(width, height)
-            _RENDER_WINDOW = rw
-            return rw
-        except AttributeError:
-            pass
 
     rw = vtk.vtkRenderWindow()
     rw.SetOffScreenRendering(True)
@@ -416,7 +405,7 @@ def _capture_png(rw: vtk.vtkRenderWindow) -> bytes:
 
     w2i = vtk.vtkWindowToImageFilter()
     w2i.SetInput(rw)
-    w2i.SetInputBufferTypeToRGBA()
+    w2i.SetInputBufferTypeToRGB()
     w2i.ReadFrontBufferOff()
     w2i.Update()
 
