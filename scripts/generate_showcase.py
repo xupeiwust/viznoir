@@ -23,103 +23,17 @@ VTK_DATA_URL = "https://raw.githubusercontent.com/pyvista/vtk-data/master/Data"
 # Files to download
 DATA_FILES = [
     "cow.vtp",
-    "bunny.ply",
     "dragon.ply",
     "head.vti",
     "disk_out_ref_surface.vtp",
-    "Human.vtp",
+    "carotid.vtk",
+    "Armadillo.ply",
 ]
 
 # Each render is a standalone Python snippet executed in its own process.
 
 RENDERS: dict[str, str] = {
-    # 1. CFD: disk_out_ref temperature field
-    "cfd_temperature": textwrap.dedent("""\
-        import vtk
-        from parapilot.engine.filters import apply_filter
-        from parapilot.engine.renderer import RenderConfig, render_to_png
-        from parapilot.engine.camera import CameraConfig
-
-        reader = vtk.vtkXMLPolyDataReader()
-        reader.SetFileName(DATA_DIR + '/disk_out_ref_surface.vtp')
-        reader.Update()
-        data = reader.GetOutput()
-
-        cam = CameraConfig(position=(25.0, 20.0, 28.0), focal_point=(0, 0, 0), view_up=(0, 0, 1))
-        cfg = RenderConfig(
-            width=1920, height=1080, background=(0.04, 0.04, 0.06),
-            colormap='cool to warm', array_name='Temp',
-            show_scalar_bar=True, scalar_bar_title='Temperature',
-        )
-        PNG = render_to_png(data, cfg, cam)
-    """),
-
-    # 2. CFD: disk_out_ref pressure field
-    "cfd_pressure": textwrap.dedent("""\
-        import vtk
-        from parapilot.engine.filters import apply_filter
-        from parapilot.engine.renderer import RenderConfig, render_to_png
-        from parapilot.engine.camera import CameraConfig
-
-        reader = vtk.vtkXMLPolyDataReader()
-        reader.SetFileName(DATA_DIR + '/disk_out_ref_surface.vtp')
-        reader.Update()
-        data = reader.GetOutput()
-
-        cam = CameraConfig(position=(-22.0, 24.0, 22.0), focal_point=(0, 0, 0), view_up=(0, 0, 1))
-        cfg = RenderConfig(
-            width=1920, height=1080, background=(0.04, 0.04, 0.06),
-            colormap='viridis', array_name='Pres',
-            show_scalar_bar=True, scalar_bar_title='Pressure',
-        )
-        PNG = render_to_png(data, cfg, cam)
-    """),
-
-    # 3. Medical: head CT slice
-    "ct_head_slice": textwrap.dedent("""\
-        import vtk
-        from parapilot.engine.filters import apply_filter
-        from parapilot.engine.renderer import RenderConfig, render_to_png
-        from parapilot.engine.camera import CameraConfig
-
-        reader = vtk.vtkXMLImageDataReader()
-        reader.SetFileName(DATA_DIR + '/head.vti')
-        reader.Update()
-        data = reader.GetOutput()
-
-        sliced = apply_filter(data, 'slice', origin=[128, 128, 93], normal=[0, 0, 1])
-        cam = CameraConfig(position=(128, 128, 400), focal_point=(128, 128, 93), view_up=(0, 1, 0))
-        cfg = RenderConfig(
-            width=1920, height=1080, background=(0.04, 0.04, 0.06),
-            colormap='grayscale', array_name='Scalars_',
-            show_scalar_bar=True, scalar_bar_title='CT Density',
-        )
-        PNG = render_to_png(sliced, cfg, cam)
-    """),
-
-    # 4. Medical: head CT contour (skull isosurface)
-    "ct_head_contour": textwrap.dedent("""\
-        import vtk
-        from parapilot.engine.filters import apply_filter
-        from parapilot.engine.renderer import RenderConfig, render_to_png
-        from parapilot.engine.camera import CameraConfig
-
-        reader = vtk.vtkXMLImageDataReader()
-        reader.SetFileName(DATA_DIR + '/head.vti')
-        reader.Update()
-        data = reader.GetOutput()
-
-        contoured = apply_filter(data, 'contour', array_name='Scalars_', values=[1200])
-        cam = CameraConfig(position=(350, 200, 250), focal_point=(128, 128, 93), view_up=(0, 0, 1))
-        cfg = RenderConfig(
-            width=1920, height=1080, background=(0.04, 0.04, 0.06),
-            colormap='turbo', array_name='Scalars_',
-            show_scalar_bar=True, scalar_bar_title='CT Density',
-        )
-        PNG = render_to_png(contoured, cfg, cam)
-    """),
-
-    # 5. Geometry: Stanford Dragon with Elevation
+    # 1. Geometry: Stanford Dragon with Elevation (FEATURED)
     "dragon": textwrap.dedent("""\
         import vtk
         from parapilot.engine.renderer import RenderConfig, render_to_png
@@ -150,7 +64,156 @@ RENDERS: dict[str, str] = {
         PNG = render_to_png(elev.GetOutput(), cfg, cam)
     """),
 
-    # 6. Geometry: Cow with Elevation
+    # 2. Medical: CT skull isosurface with Inferno + Elevation
+    "ct_head_contour": textwrap.dedent("""\
+        import vtk
+        from parapilot.engine.filters import apply_filter
+        from parapilot.engine.renderer import RenderConfig, render_to_png
+        from parapilot.engine.camera import CameraConfig
+
+        reader = vtk.vtkXMLImageDataReader()
+        reader.SetFileName(DATA_DIR + '/head.vti')
+        reader.Update()
+        data = reader.GetOutput()
+
+        contoured = apply_filter(data, 'contour', array_name='Scalars_', values=[1200])
+        norms = vtk.vtkPolyDataNormals()
+        norms.SetInputData(contoured)
+        norms.ComputePointNormalsOn()
+        norms.SplittingOff()
+        norms.Update()
+
+        elev = vtk.vtkElevationFilter()
+        elev.SetInputConnection(norms.GetOutputPort())
+        b = contoured.GetBounds()
+        elev.SetLowPoint(0, 0, b[4])
+        elev.SetHighPoint(0, 0, b[5])
+        elev.Update()
+
+        cam = CameraConfig(position=(350, 350, 180), focal_point=(128, 128, 93), view_up=(0, 0, 1))
+        cfg = RenderConfig(
+            width=1920, height=1080, background=(0.04, 0.04, 0.06),
+            colormap='inferno', array_name='Elevation',
+            show_scalar_bar=True, scalar_bar_title='Elevation',
+        )
+        PNG = render_to_png(elev.GetOutput(), cfg, cam)
+    """),
+
+    # 3. Flow: Carotid blood flow streamlines with tubes
+    "streamlines": textwrap.dedent("""\
+        import vtk
+        from parapilot.engine.filters import streamlines
+        from parapilot.engine.renderer import RenderConfig, render_to_png
+        from parapilot.engine.camera import CameraConfig
+
+        reader = vtk.vtkStructuredPointsReader()
+        reader.SetFileName(DATA_DIR + '/carotid.vtk')
+        reader.Update()
+        data = reader.GetOutput()
+
+        lines = streamlines(
+            data, array_name='vectors',
+            seed_point1=(120, 90, 15), seed_point2=(150, 120, 35),
+            num_seeds=80, integration_direction='both',
+        )
+
+        calc = vtk.vtkArrayCalculator()
+        calc.SetInputData(lines)
+        calc.AddVectorArrayName('vectors')
+        calc.SetFunction('mag(vectors)')
+        calc.SetResultArrayName('VelocityMag')
+        calc.Update()
+
+        tube = vtk.vtkTubeFilter()
+        tube.SetInputConnection(calc.GetOutputPort())
+        tube.SetRadius(0.3)
+        tube.SetNumberOfSides(12)
+        tube.CappingOn()
+        tube.Update()
+
+        cam = CameraConfig(position=(180, 80, 60), focal_point=(137, 104, 23), view_up=(0, 0, 1))
+        cfg = RenderConfig(
+            width=1920, height=1080, background=(0.04, 0.04, 0.06),
+            colormap='turbo', array_name='VelocityMag',
+            show_scalar_bar=True, scalar_bar_title='Velocity Magnitude',
+        )
+        PNG = render_to_png(tube.GetOutput(), cfg, cam)
+    """),
+
+    # 4. Geometry: Armadillo clipped at X-plane
+    "armadillo_clip": textwrap.dedent("""\
+        import vtk
+        from parapilot.engine.filters import clip_plane
+        from parapilot.engine.renderer import RenderConfig, render_to_png
+        from parapilot.engine.camera import CameraConfig
+
+        reader = vtk.vtkPLYReader()
+        reader.SetFileName(DATA_DIR + '/Armadillo.ply')
+        reader.Update()
+
+        norms = vtk.vtkPolyDataNormals()
+        norms.SetInputData(reader.GetOutput())
+        norms.ComputePointNormalsOn()
+        norms.Update()
+
+        elev = vtk.vtkElevationFilter()
+        elev.SetInputConnection(norms.GetOutputPort())
+        b = reader.GetOutput().GetBounds()
+        elev.SetLowPoint(0, b[2], 0)
+        elev.SetHighPoint(0, b[3], 0)
+        elev.Update()
+
+        clipped = clip_plane(elev.GetOutput(), origin=(5, 0, 0), normal=(1, 0, 0))
+        cam = CameraConfig(position=(-180, 60, 180), focal_point=(0, 20, 0), view_up=(0, 1, 0))
+        cfg = RenderConfig(
+            width=1920, height=1080, background=(0.04, 0.04, 0.06),
+            colormap='viridis', array_name='Elevation',
+            show_scalar_bar=True, scalar_bar_title='Elevation',
+        )
+        PNG = render_to_png(clipped, cfg, cam)
+    """),
+
+    # 5. CFD: disk_out_ref pressure field
+    "cfd_pressure": textwrap.dedent("""\
+        import vtk
+        from parapilot.engine.renderer import RenderConfig, render_to_png
+        from parapilot.engine.camera import CameraConfig
+
+        reader = vtk.vtkXMLPolyDataReader()
+        reader.SetFileName(DATA_DIR + '/disk_out_ref_surface.vtp')
+        reader.Update()
+
+        cam = CameraConfig(position=(-22.0, 24.0, 22.0), focal_point=(0, 0, 0), view_up=(0, 0, 1))
+        cfg = RenderConfig(
+            width=1920, height=1080, background=(0.04, 0.04, 0.06),
+            colormap='viridis', array_name='Pres',
+            show_scalar_bar=True, scalar_bar_title='Pressure',
+        )
+        PNG = render_to_png(reader.GetOutput(), cfg, cam)
+    """),
+
+    # 6. Medical: head CT axial slice
+    "ct_head_slice": textwrap.dedent("""\
+        import vtk
+        from parapilot.engine.filters import apply_filter
+        from parapilot.engine.renderer import RenderConfig, render_to_png
+        from parapilot.engine.camera import CameraConfig
+
+        reader = vtk.vtkXMLImageDataReader()
+        reader.SetFileName(DATA_DIR + '/head.vti')
+        reader.Update()
+
+        sliced = apply_filter(reader.GetOutput(), 'slice', origin=[128, 128, 93], normal=[0, 0, 1])
+        cam = CameraConfig(position=(128, 128, 400), focal_point=(128, 128, 93), view_up=(0, 1, 0))
+        cfg = RenderConfig(
+            width=1920, height=1080, background=(0.04, 0.04, 0.06),
+            colormap='grayscale', array_name='Scalars_',
+            show_scalar_bar=True, scalar_bar_title='CT Density',
+        )
+        PNG = render_to_png(sliced, cfg, cam)
+    """),
+
+    # 7. Geometry: VTK Cow with Elevation
     "cow": textwrap.dedent("""\
         import vtk
         from parapilot.engine.renderer import RenderConfig, render_to_png
@@ -241,7 +304,6 @@ def run_render(name: str, code: str) -> bool:
         err = result.stderr.strip().splitlines()[-1] if result.stderr else "unknown"
         print(f"  FAIL: {err}")
         if result.stderr:
-            # Print last 5 lines for debugging
             for line in result.stderr.strip().splitlines()[-5:]:
                 print(f"    {line}")
         return False

@@ -11,8 +11,22 @@ const renders = [
     src: '/parapilot/showcase/ct_head_contour.png',
     title: 'CT Skull Isosurface',
     tool: 'parapilot.contour',
-    desc: 'Head CT scan — bone extraction at HU 1200',
+    desc: 'Bone extraction at HU 1200 — Inferno colormap',
     field: 'head.vti',
+  },
+  {
+    src: '/parapilot/showcase/streamlines.png',
+    title: 'Carotid Blood Flow',
+    tool: 'parapilot.streamlines',
+    desc: 'Velocity tubes from 80 seed points — Turbo colormap',
+    field: 'carotid.vtk',
+  },
+  {
+    src: '/parapilot/showcase/armadillo_clip.png',
+    title: 'Armadillo Clip',
+    tool: 'parapilot.clip',
+    desc: '173K vertex mesh clipped at X-plane — Viridis',
+    field: 'Armadillo.ply',
   },
   {
     src: '/parapilot/showcase/cfd_pressure.png',
@@ -35,13 +49,6 @@ const renders = [
     desc: 'Classic VTK example — Magma colormap, Elevation',
     field: 'cow.vtp',
   },
-  {
-    src: '/parapilot/showcase/cfd_temperature.png',
-    title: 'CFD Temperature',
-    tool: 'parapilot.render',
-    desc: 'disk_out_ref — Cool to Warm colormap',
-    field: 'disk_out_ref.vtp',
-  },
 ];
 ---
 
@@ -56,7 +63,7 @@ const renders = [
         <span class="gradient-text-white">Real renders, zero GUI</span>
       </h2>
       <p class="mt-4 text-text-secondary max-w-xl mx-auto text-lg">
-        Official VTK examples rendered by parapilot — headless, no ParaView GUI
+        Official VTK examples rendered by parapilot — 5 tools, 7 datasets, headless
       </p>
     </div>
 
@@ -111,7 +118,7 @@ const renders = [
 
     <div class="text-center mt-10">
       <p class="text-text-secondary/50 text-sm font-mono">
-        Stanford Dragon &middot; CT Head &middot; disk_out_ref CFD &middot; VTK Cow &middot; 14 colormaps
+        render &middot; contour &middot; streamlines &middot; clip &middot; slice &mdash; 5 tools, 14 colormaps
       </p>
     </div>
   </div>
