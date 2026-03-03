@@ -28,7 +28,7 @@ class RenderConfig:
     log_scale: bool = False
     array_name: str | None = None
     component: int = -1  # -1 = magnitude
-    representation: str = "surface"  # surface, wireframe, points
+    representation: str = "surface"  # surface, wireframe, points, volume
     opacity: float = 1.0
     show_scalar_bar: bool = True
     scalar_bar_title: str | None = None
@@ -125,53 +125,57 @@ class VTKRenderer:
         # Find array and association
         array_name, association = _resolve_array(render_data, self._config.array_name)
 
-        # Build mapper
-        mapper = vtk.vtkDataSetMapper()
-        mapper.SetInputData(render_data)
-
-        if array_name is not None:
-            scalar_range = self._config.scalar_range
-            if scalar_range is None:
-                scalar_range = _get_scalar_range(render_data, array_name, association, self._config.component)
-
-            mapper.SetScalarVisibility(True)
-            if association == "cell":
-                mapper.SetScalarModeToUseCellFieldData()
-            else:
-                mapper.SetScalarModeToUsePointFieldData()
-            mapper.SelectColorArray(array_name)
-
-            if self._config.component >= 0:
-                mapper.ColorByArrayComponent(array_name, self._config.component)
-            else:
-                mapper.GetLookupTable().SetVectorModeToMagnitude()
-
-            # Build LUT from colormaps module
-            from .colormaps import build_lut
-
-            lut = build_lut(
-                self._config.colormap,
-                scalar_range=scalar_range,
-                log_scale=self._config.log_scale,
-            )
-            mapper.SetLookupTable(lut)
-            mapper.SetScalarRange(*scalar_range)
+        if self._config.representation == "volume":
+            # Volume rendering path
+            self._render_volume(renderer, render_data, array_name, association)
         else:
-            mapper.SetScalarVisibility(False)
+            # Surface/wireframe/points rendering path
+            mapper = vtk.vtkDataSetMapper()
+            mapper.SetInputData(render_data)
 
-        # Build actor
-        actor = vtk.vtkActor()
-        actor.SetMapper(mapper)
+            if array_name is not None:
+                scalar_range = self._config.scalar_range
+                if scalar_range is None:
+                    scalar_range = _get_scalar_range(render_data, array_name, association, self._config.component)
 
-        prop = actor.GetProperty()
-        _apply_representation(prop, self._config)
+                mapper.SetScalarVisibility(True)
+                if association == "cell":
+                    mapper.SetScalarModeToUseCellFieldData()
+                else:
+                    mapper.SetScalarModeToUsePointFieldData()
+                mapper.SelectColorArray(array_name)
 
-        renderer.AddActor(actor)
+                if self._config.component >= 0:
+                    mapper.ColorByArrayComponent(array_name, self._config.component)
+                else:
+                    mapper.GetLookupTable().SetVectorModeToMagnitude()
 
-        # Scalar bar
-        if self._config.show_scalar_bar and array_name is not None:
-            bar = _build_scalar_bar(mapper, self._config, array_name)
-            renderer.AddActor2D(bar)
+                # Build LUT from colormaps module
+                from .colormaps import build_lut
+
+                lut = build_lut(
+                    self._config.colormap,
+                    scalar_range=scalar_range,
+                    log_scale=self._config.log_scale,
+                )
+                mapper.SetLookupTable(lut)
+                mapper.SetScalarRange(*scalar_range)
+            else:
+                mapper.SetScalarVisibility(False)
+
+            # Build actor
+            actor = vtk.vtkActor()
+            actor.SetMapper(mapper)
+
+            prop = actor.GetProperty()
+            _apply_representation(prop, self._config)
+
+            renderer.AddActor(actor)
+
+            # Scalar bar
+            if self._config.show_scalar_bar and array_name is not None:
+                bar = _build_scalar_bar(mapper, self._config, array_name)
+                renderer.AddActor2D(bar)
 
         # Camera
         if camera_config is not None and isinstance(camera_config, CameraConfig):
@@ -182,6 +186,79 @@ class VTKRenderer:
 
         rw.Render()
         return _capture_png(rw)
+
+    def _render_volume(
+        self,
+        renderer: vtk.vtkRenderer,
+        data: vtk.vtkDataSet,
+        array_name: str | None,
+        association: str,
+    ) -> None:
+        """Add a volume actor to the renderer using vtkSmartVolumeMapper."""
+        import vtk
+
+        from .colormaps import build_lut
+
+        # Volume rendering requires vtkImageData; convert if needed
+        image_data = data
+        if not isinstance(data, vtk.vtkImageData):
+            # Try resampling to regular grid
+            resample = vtk.vtkResampleToImage()
+            resample.SetInputData(data)
+            resample.SetSamplingDimensions(128, 128, 128)
+            resample.Update()
+            image_data = resample.GetOutput()
+
+        # Set active scalars
+        if array_name is not None:
+            pd = image_data.GetPointData()
+            if pd.GetArray(array_name) is not None:
+                pd.SetActiveScalars(array_name)
+
+        # Scalar range
+        scalar_range = self._config.scalar_range
+        if scalar_range is None and array_name is not None:
+            scalar_range = _get_scalar_range(image_data, array_name, "point", self._config.component)
+        if scalar_range is None:
+            scalar_range = (0.0, 1.0)
+
+        lo, hi = scalar_range
+
+        # Build color transfer function from colormap
+        ctf = build_lut(
+            self._config.colormap,
+            scalar_range=scalar_range,
+            log_scale=self._config.log_scale,
+        )
+        # build_lut returns vtkColorTransferFunction — use directly
+
+        # Opacity transfer function — ramp from transparent to opaque
+        otf = vtk.vtkPiecewiseFunction()
+        otf.AddPoint(lo, 0.0)
+        otf.AddPoint(lo + (hi - lo) * 0.2, 0.0)
+        otf.AddPoint(lo + (hi - lo) * 0.4, 0.05)
+        otf.AddPoint(hi, self._config.opacity * 0.5)
+
+        # Volume property
+        vol_prop = vtk.vtkVolumeProperty()
+        vol_prop.SetColor(ctf)
+        vol_prop.SetScalarOpacity(otf)
+        vol_prop.ShadeOn()
+        vol_prop.SetInterpolationTypeToLinear()
+        vol_prop.SetAmbient(0.2)
+        vol_prop.SetDiffuse(0.7)
+        vol_prop.SetSpecular(0.3)
+
+        # Volume mapper
+        mapper = vtk.vtkSmartVolumeMapper()
+        mapper.SetInputData(image_data)
+
+        # Volume actor
+        volume = vtk.vtkVolume()
+        volume.SetMapper(mapper)
+        volume.SetProperty(vol_prop)
+
+        renderer.AddVolume(volume)
 
     def render_multiple(
         self,

@@ -55,3 +55,7 @@ class TestRenderConfig:
         )
         assert config.edge_visibility is True
         assert config.edge_color == (0.5, 0.5, 0.5)
+
+    def test_volume_representation(self):
+        config = RenderConfig(representation="volume")
+        assert config.representation == "volume"
