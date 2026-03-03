@@ -11,8 +11,11 @@ build/
 !www/public/showcase/*.webp
 !www/public/og-image.png
 *.mp4
+!www/public/showcase/*.mp4
 *.gif
 !www/public/showcase/*.gif
+*.webm
+!www/public/showcase/*.webm
 /tmp/
 .mypy_cache/
 .ruff_cache/
