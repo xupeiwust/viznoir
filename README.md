@@ -53,7 +53,7 @@ docker compose up -d
 
 Requires NVIDIA Container Toolkit for GPU rendering.
 
-## Tools (15)
+## Tools (16)
 
 | Tool | Description |
 |------|-------------|
@@ -65,6 +65,7 @@ Requires NVIDIA Container Toolkit for GPU rendering.
 | `streamlines` | Vector field flow visualization |
 | `cinematic_render` | Publication-quality render (SSAO, PBR, 3-point lighting) |
 | `compare` | Side-by-side or diff comparison of two datasets |
+| `preview_3d` | Export to glTF/glB for interactive 3D viewing |
 | `extract_stats` | Min/max/mean/std for fields |
 | `plot_over_line` | Sample values along a line |
 | `integrate_surface` | Force/flux integration over surfaces |
@@ -112,7 +113,7 @@ See the full gallery at **[kimimgo.github.io/parapilot](https://kimimgo.github.i
 │  ↕ MCP protocol (stdio)                    │
 ├─────────────────────────────────────────────┤
 │  parapilot MCP Server (FastMCP)             │
-│  ├── tools/     15 MCP tools                │
+│  ├── tools/     16 MCP tools                │
 │  ├── resources/ 11 MCP resources            │
 │  └── prompts/   3 MCP prompts               │
 ├─────────────────────────────────────────────┤
@@ -155,7 +156,7 @@ OpenFOAM (.foam), VTK (.vti/.vtp/.vtu/.vtm), CGNS (.cgns), Ensight (.case), Exod
 git clone https://github.com/kimimgo/parapilot
 cd parapilot
 pip install -e ".[dev]"
-pytest                     # 622 tests
+pytest                     # 624 tests
 ruff check src/ tests/     # lint
 mypy src/parapilot/        # type check
 ```
@@ -165,9 +166,9 @@ mypy src/parapilot/        # type check
 | | parapilot | LLNL/paraview_mcp | Kitware/vtk-mcp |
 |---|---|---|---|
 | Rendering | Headless VTK + ParaView | GUI-attached only | None (docs search) |
-| Tests | 622 | 0 | 0 |
+| Tests | 624 | 0 | 0 |
 | Docker | GPU (EGL) | No | No |
-| MCP Tools | 15 | 23 | 3 |
+| MCP Tools | 16 | 23 | 3 |
 | Plugin | Claude Code plugin | No | No |
 
 ## Known Limitations
