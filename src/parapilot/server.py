@@ -764,6 +764,39 @@ async def compare(
 
 
 # ---------------------------------------------------------------------------
+# preview_3d — interactive 3D viewer export
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool()
+async def preview_3d(
+    file_path: str,
+    field_name: str | None = None,
+    timestep: float | str | None = None,
+    output_filename: str = "preview.glb",
+) -> dict[str, Any]:
+    """Export dataset to glTF/glB for interactive 3D viewing in a browser.
+
+    Returns the exported file path and a viewer URL hint.
+    Requires VTK >= 9.4 with vtkGLTFExporter support.
+    """
+    t0 = time.monotonic()
+    logger.info("tool.preview_3d: file=%s", file_path)
+    _validate_file_path(file_path)
+    from parapilot.tools.preview3d import preview_3d_impl
+
+    result = await preview_3d_impl(
+        file_path=file_path,
+        runner=_runner,
+        field_name=field_name,
+        timestep=timestep,
+        output_filename=output_filename,
+    )
+    logger.debug("tool.preview_3d: done in %.2fs", time.monotonic() - t0)
+    return result
+
+
+# ---------------------------------------------------------------------------
 # Resources
 # ---------------------------------------------------------------------------
 

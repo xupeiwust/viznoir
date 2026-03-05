@@ -259,3 +259,57 @@ class TestExtractImpls:
 
         pipeline_def = mock_exec.call_args[0][0]
         assert len(pipeline_def.pipeline) == 2  # ExtractSurface + IntegrateVariables
+
+
+# ---------------------------------------------------------------------------
+# preview_3d_impl
+# ---------------------------------------------------------------------------
+
+class TestPreview3dImpl:
+    @pytest.mark.asyncio
+    @patch("parapilot.tools.preview3d.export_gltf")
+    @patch("parapilot.tools.preview3d.read_dataset")
+    async def test_preview_3d_basic(self, mock_read, mock_export, tmp_path):
+        from parapilot.tools.preview3d import preview_3d_impl
+
+        mock_read.return_value = MagicMock()
+        mock_export.return_value = {
+            "path": str(tmp_path / "preview.glb"),
+            "format": ".glb",
+            "size_bytes": 1024,
+        }
+        runner = MagicMock()
+
+        import os
+        with patch.dict(os.environ, {"PARAPILOT_OUTPUT_DIR": str(tmp_path)}):
+            result = await preview_3d_impl(
+                file_path="/data/case.vtk",
+                runner=runner,
+            )
+
+        assert result["format"] == ".glb"
+        assert "viewer_hint" in result
+        mock_read.assert_called_once()
+        mock_export.assert_called_once()
+
+    @pytest.mark.asyncio
+    @patch("parapilot.tools.preview3d.get_timesteps")
+    @patch("parapilot.tools.preview3d.export_gltf")
+    @patch("parapilot.tools.preview3d.read_dataset")
+    async def test_preview_3d_latest_timestep(self, mock_read, mock_export, mock_ts, tmp_path):
+        from parapilot.tools.preview3d import preview_3d_impl
+
+        mock_ts.return_value = [0.0, 1.0, 2.0]
+        mock_read.return_value = MagicMock()
+        mock_export.return_value = {"path": "p.glb", "format": ".glb", "size_bytes": 512}
+        runner = MagicMock()
+
+        import os
+        with patch.dict(os.environ, {"PARAPILOT_OUTPUT_DIR": str(tmp_path)}):
+            await preview_3d_impl(
+                file_path="/data/case.vtk",
+                runner=runner,
+                timestep="latest",
+            )
+
+        mock_read.assert_called_once_with("/data/case.vtk", timestep=2.0)

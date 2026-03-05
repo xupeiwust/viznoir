@@ -131,7 +131,7 @@ server.py (MCP tool)
 
 | 항목 | 수량 |
 |------|------|
-| Tools | 15 |
+| Tools | 16 |
 | Resources | 11 |
 | Prompts | 3 |
 | Tests | 622 |
