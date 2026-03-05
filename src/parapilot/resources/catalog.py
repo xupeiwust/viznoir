@@ -57,7 +57,7 @@ def register_resources(mcp: FastMCP) -> None:
 
     @mcp.resource("parapilot://cameras")
     def cameras_resource() -> str:
-        """Camera presets and custom configuration guide."""
+        """Camera presets, auto-camera, and custom configuration guide."""
         cameras = {
             "presets": {
                 "isometric": "3D diagonal view (default)",
@@ -66,6 +66,17 @@ def register_resources(mcp: FastMCP) -> None:
                 "right": "Right side view (YZ plane)",
                 "left": "Left side view (YZ plane, reversed)",
                 "back": "Back view (XZ plane, reversed)",
+                "auto": "PCA shape analysis → optimal angle + frustum fitting (cinematic_render only)",
+            },
+            "auto_camera": {
+                "description": "Automatic camera positioning via PCA-based shape analysis",
+                "fill_ratio": "Target viewport fill (0.0-1.0, default 0.75)",
+                "shape_detection": {
+                    "plate": "Flat objects → high elevation (55°), looking from above",
+                    "tube": "Elongated objects → low elevation (25°), 3/4 side view",
+                    "sphere": "Roughly uniform → classic isometric (45°, 35°)",
+                    "general": "Default 3/4 view (40°, 30°)",
+                },
             },
             "custom": {
                 "position": "[x, y, z] — camera location",
@@ -75,6 +86,29 @@ def register_resources(mcp: FastMCP) -> None:
             },
         }
         return json.dumps(cameras, indent=2)
+
+    @mcp.resource("parapilot://cinematic")
+    def cinematic_resource() -> str:
+        """Cinematic rendering options — lighting, materials, backgrounds, quality."""
+        from parapilot.engine.lighting import get_preset_names as get_lighting
+        from parapilot.engine.materials import get_preset_names as get_materials
+        from parapilot.engine.renderer_cine import QUALITY_PRESETS
+        from parapilot.engine.scene import get_preset_names as get_backgrounds
+
+        data = {
+            "lighting_presets": get_lighting(),
+            "material_presets": get_materials(),
+            "background_presets": get_backgrounds(),
+            "quality_presets": {
+                name: {k: v for k, v in preset.items()}
+                for name, preset in QUALITY_PRESETS.items()
+            },
+            "postfx": {
+                "ssao": "Screen-Space Ambient Occlusion — contact shadows",
+                "fxaa": "Fast Approximate Anti-Aliasing — edge smoothing",
+            },
+        }
+        return json.dumps(data, indent=2)
 
     @mcp.resource("parapilot://pipelines/cfd")
     def cfd_pipelines_resource() -> str:
