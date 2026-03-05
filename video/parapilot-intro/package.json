@@ -1,0 +1,24 @@
+{
+  "name": "parapilot-intro",
+  "version": "1.0.0",
+  "description": "parapilot introduction video built with Remotion",
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "build": "remotion render src/index.ts parapilot-intro out/parapilot-intro.mp4",
+    "preview": "remotion preview src/index.ts",
+    "render:gif": "remotion render src/index.ts parapilot-intro out/parapilot-intro.gif --image-format=png"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@remotion/cli": "^4.0.433",
+    "@remotion/renderer": "^4.0.433",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "remotion": "^4.0.433",
+    "typescript": "^5.9.3"
+  }
+}

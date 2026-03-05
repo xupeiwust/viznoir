@@ -1,0 +1,173 @@
+[
+  {
+    "tool": "inspect_data",
+    "dataset": "wavelet",
+    "status": "PASS",
+    "elapsed": 0.487,
+    "output_size": 411,
+    "notes": "",
+    "output_file": ""
+  },
+  {
+    "tool": "render",
+    "dataset": "wavelet",
+    "status": "PASS",
+    "elapsed": 0.622,
+    "output_size": 188428,
+    "notes": "",
+    "output_file": "render_wavelet.png"
+  },
+  {
+    "tool": "render (colormap)",
+    "dataset": "sphere",
+    "status": "PASS",
+    "elapsed": 0.637,
+    "output_size": 116032,
+    "notes": "",
+    "output_file": "render_sphere_viridis.png"
+  },
+  {
+    "tool": "slice (auto-origin)",
+    "dataset": "wavelet",
+    "status": "PASS",
+    "elapsed": 0.624,
+    "output_size": 132425,
+    "notes": "",
+    "output_file": "slice_wavelet_auto.png"
+  },
+  {
+    "tool": "slice (explicit)",
+    "dataset": "uniform",
+    "status": "PASS",
+    "elapsed": 0.63,
+    "output_size": 289547,
+    "notes": "",
+    "output_file": "slice_uniform_explicit.png"
+  },
+  {
+    "tool": "contour (valid iso)",
+    "dataset": "wavelet",
+    "status": "PASS",
+    "elapsed": 0.594,
+    "output_size": 153903,
+    "notes": "",
+    "output_file": "contour_wavelet_valid.png"
+  },
+  {
+    "tool": "contour (out-of-range)",
+    "dataset": "wavelet",
+    "status": "PASS",
+    "elapsed": 0.0,
+    "output_size": 0,
+    "notes": "Correctly rejected: VTK script exited with code 1.\nstderr: Traceback (most recent call last):\n  File \"/tmp/parapilot_9d5",
+    "output_file": ""
+  },
+  {
+    "tool": "clip (auto-origin)",
+    "dataset": "wavelet",
+    "status": "PASS",
+    "elapsed": 0.765,
+    "output_size": 157105,
+    "notes": "",
+    "output_file": "clip_wavelet_auto.png"
+  },
+  {
+    "tool": "clip (invert)",
+    "dataset": "wavelet",
+    "status": "PASS",
+    "elapsed": 0.61,
+    "output_size": 168863,
+    "notes": "",
+    "output_file": "clip_wavelet_invert.png"
+  },
+  {
+    "tool": "streamlines (auto-seed)",
+    "dataset": "flow",
+    "status": "PASS",
+    "elapsed": 0.597,
+    "output_size": 68899,
+    "notes": "",
+    "output_file": "streamlines_flow_auto.png"
+  },
+  {
+    "tool": "streamlines (explicit)",
+    "dataset": "flow",
+    "status": "PASS",
+    "elapsed": 0.629,
+    "output_size": 74876,
+    "notes": "",
+    "output_file": "streamlines_flow_explicit.png"
+  },
+  {
+    "tool": "plot_over_line",
+    "dataset": "wavelet",
+    "status": "PASS",
+    "elapsed": 0.606,
+    "output_size": 2369,
+    "notes": "",
+    "output_file": ""
+  },
+  {
+    "tool": "extract_stats",
+    "dataset": "wavelet",
+    "status": "PASS",
+    "elapsed": 0.444,
+    "output_size": 159,
+    "notes": "",
+    "output_file": ""
+  },
+  {
+    "tool": "integrate_surface",
+    "dataset": "sphere",
+    "status": "PASS",
+    "elapsed": 0.453,
+    "output_size": 39,
+    "notes": "",
+    "output_file": ""
+  },
+  {
+    "tool": "animate (orbit/gif)",
+    "dataset": "wavelet",
+    "status": "PASS",
+    "elapsed": 0.903,
+    "output_size": 800991,
+    "notes": "",
+    "output_file": "animate_orbit.gif"
+  },
+  {
+    "tool": "execute_pipeline",
+    "dataset": "wavelet",
+    "status": "PASS",
+    "elapsed": 0.728,
+    "output_size": 136308,
+    "notes": "",
+    "output_file": "pipeline_slice.png"
+  },
+  {
+    "tool": "execute_pipeline (threshold)",
+    "dataset": "wavelet",
+    "status": "PASS",
+    "elapsed": 0.737,
+    "output_size": 177210,
+    "notes": "",
+    "output_file": "pipeline_threshold.png"
+  },
+  {
+    "tool": "pv_isosurface",
+    "dataset": "N/A",
+    "status": "SKIP",
+    "elapsed": 0.0,
+    "output_size": 0,
+    "notes": "Requires DualSPHysics Docker image + bi4 data \u2014 skipped in E2E validation",
+    "output_file": ""
+  },
+  {
+    "tool": "split_animate (frames)",
+    "dataset": "wavelet",
+    "status": "PASS",
+    "elapsed": 0.892,
+    "output_size": 8,
+    "notes": "frames=8, composed=8",
+    "output_file": ""
+  }
+]
