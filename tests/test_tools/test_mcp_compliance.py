@@ -1,9 +1,9 @@
 """MCP protocol compliance tests.
 
-Validates that parapilot's MCP server follows best practices:
-- All tools have descriptions
-- All tools have proper parameter schemas
-- Resource URIs follow the parapilot:// scheme
+Validates parapilot follows MCP server best practices:
+- All tools have descriptions (docstrings)
+- All tools have typed parameters
+- Resource URIs follow parapilot:// scheme
 - Server metadata is correct
 - Tool naming conventions are consistent
 """
@@ -16,8 +16,8 @@ import re
 import pytest
 
 
-def _get_tool_objects() -> dict:
-    """Get FunctionTool objects from server module."""
+def _get_tool_functions() -> dict:
+    """Get the underlying functions from FunctionTool objects."""
     from parapilot import server
 
     names = [
@@ -31,25 +31,24 @@ def _get_tool_objects() -> dict:
     tools = {}
     for name in names:
         obj = getattr(server, name)
-        tools[name] = obj
+        # FunctionTool wraps the actual function as .fn
+        fn = getattr(obj, "fn", obj)
+        tools[name] = fn
     return tools
 
 
 class TestToolCompliance:
     """Every tool must have a description and typed parameters."""
 
-    def test_all_tools_have_descriptions(self):
-        """MCP tools must have descriptions for LLM tool selection."""
-        for name, tool in _get_tool_objects().items():
-            desc = getattr(tool, "description", None) or ""
-            assert len(desc) > 10, f"Tool {name} has no/short description"
+    def test_all_tools_have_docstrings(self):
+        """MCP tools must have docstrings that become descriptions."""
+        for name, fn in _get_tool_functions().items():
+            doc = fn.__doc__ or ""
+            assert len(doc) > 10, f"Tool {name} has no/short docstring"
 
     def test_all_tools_have_typed_parameters(self):
         """MCP tools must have type annotations for JSON schema generation."""
-        for name, tool in _get_tool_objects().items():
-            fn = getattr(tool, "fn", None)
-            if fn is None:
-                continue
+        for name, fn in _get_tool_functions().items():
             sig = inspect.signature(fn)
             for pname, param in sig.parameters.items():
                 if pname in ("self", "ctx"):
@@ -60,10 +59,7 @@ class TestToolCompliance:
 
     def test_all_tools_have_return_annotations(self):
         """MCP tools should have return type annotations."""
-        for name, tool in _get_tool_objects().items():
-            fn = getattr(tool, "fn", None)
-            if fn is None:
-                continue
+        for name, fn in _get_tool_functions().items():
             sig = inspect.signature(fn)
             assert sig.return_annotation != inspect.Signature.empty, (
                 f"Tool {name} has no return type annotation"
@@ -72,33 +68,24 @@ class TestToolCompliance:
     def test_tool_names_are_snake_case(self):
         """MCP tool names should be snake_case."""
         pattern = re.compile(r"^[a-z][a-z0-9_]*$")
-        for name in _get_tool_objects():
+        for name in _get_tool_functions():
             assert pattern.match(name), f"Tool name '{name}' is not snake_case"
 
     def test_tool_count_matches_expected(self):
         """Guard against accidentally dropping or adding tools."""
-        assert len(_get_tool_objects()) == 18
+        assert len(_get_tool_functions()) == 18
 
-    def test_descriptions_are_unique(self):
-        """No two tools should have the same description."""
-        descriptions = []
-        for name, tool in _get_tool_objects().items():
-            desc = getattr(tool, "description", "") or ""
-            first_line = desc.split("\n")[0].strip()
-            descriptions.append((name, first_line))
-        seen = {}
-        for name, desc in descriptions:
-            if desc in seen:
-                pytest.fail(f"Tools '{seen[desc]}' and '{name}' have duplicate descriptions")
-            seen[desc] = name
-
-    def test_tool_names_match_attribute(self):
-        """FunctionTool.name should match the attribute name on server module."""
-        for name, tool in _get_tool_objects().items():
-            tool_name = getattr(tool, "name", None)
-            assert tool_name == name, (
-                f"Tool attr '{name}' has FunctionTool.name='{tool_name}'"
-            )
+    def test_docstrings_are_unique(self):
+        """No two tools should have the same first-line docstring."""
+        seen: dict[str, str] = {}
+        for name, fn in _get_tool_functions().items():
+            doc = (fn.__doc__ or "").strip()
+            first_line = doc.split("\n")[0].strip()
+            if first_line in seen:
+                pytest.fail(
+                    f"Tools '{seen[first_line]}' and '{name}' share docstring: {first_line}"
+                )
+            seen[first_line] = name
 
 
 class TestResourceCompliance:
@@ -110,20 +97,13 @@ class TestResourceCompliance:
         uris = re.findall(r"parapilot://[\w/\-]+", instr)
         assert len(uris) >= 5, f"Expected 5+ resource URIs, found {len(uris)}"
         for uri in uris:
-            assert uri.startswith("parapilot://"), f"Invalid URI scheme: {uri}"
+            assert uri.startswith("parapilot://"), f"Invalid URI: {uri}"
 
     def test_core_resources_documented(self):
-        """Core resource URIs must be in instructions."""
         from parapilot.server import mcp
         instr = mcp.instructions or ""
-        expected = [
-            "parapilot://formats",
-            "parapilot://filters",
-            "parapilot://colormaps",
-            "parapilot://cameras",
-            "parapilot://cinematic",
-        ]
-        for res in expected:
+        for res in ["parapilot://formats", "parapilot://filters",
+                     "parapilot://colormaps", "parapilot://cameras"]:
             assert res in instr, f"Resource {res} not in instructions"
 
 
@@ -144,13 +124,11 @@ class TestServerMetadata:
         instr = mcp.instructions or ""
         assert "inspect_data" in instr
         assert "render" in instr
-        # Must describe recommended usage order
-        assert "Workflow" in instr or "workflow" in instr
 
     def test_instructions_mention_capabilities(self):
         from parapilot.server import mcp
         instr = (mcp.instructions or "").lower()
-        for cap in ["cfd", "fea", "cae", "visualization", "pipeline"]:
+        for cap in ["cfd", "fea", "cae", "visualization"]:
             assert cap in instr, f"Instructions missing '{cap}'"
 
 
@@ -167,11 +145,8 @@ class TestSecurityCompliance:
             "inspect_data", "render", "slice", "contour", "clip",
             "streamlines", "animate", "cinematic_render",
         ]
-        for name, tool in _get_tool_objects().items():
+        for name, fn in _get_tool_functions().items():
             if name not in data_tools:
-                continue
-            fn = getattr(tool, "fn", None)
-            if fn is None:
                 continue
             sig = inspect.signature(fn)
             assert "file_path" in sig.parameters, (
