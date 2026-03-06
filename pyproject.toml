@@ -10,11 +10,17 @@ authors = [
 ]
 keywords = ["mcp", "vtk", "paraview", "cfd", "cae", "post-processing", "simulation"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
     "Topic :: Scientific/Engineering :: Visualization",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: OS Independent",
+    "Typing :: Typed",
 ]
 
 dependencies = [
@@ -51,6 +57,7 @@ Homepage = "https://kimimgo.github.io/parapilot"
 Repository = "https://github.com/kimimgo/parapilot"
 Documentation = "https://kimimgo.github.io/parapilot/docs/"
 Issues = "https://github.com/kimimgo/parapilot/issues"
+Changelog = "https://github.com/kimimgo/parapilot/blob/main/CHANGELOG.md"
 
 [build-system]
 requires = ["hatchling"]

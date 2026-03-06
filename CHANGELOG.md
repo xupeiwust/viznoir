@@ -44,6 +44,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Slice/clip: auto origin from dataset center
 - Renderer: reject 0-point datasets in `_resolve_renderable`
 - PNG extraction: O(n) byte-by-byte copy replaced with numpy bulk copy
+- CI: lint/type check separated into parallel job for faster feedback
+- CI: VTK headless test skip mechanism (3-layer defense: conftest set + `*_vtk.py` pattern + env var)
+
+### Added (CI/CD & Quality)
+
+- 5 quality gates: G1 ruff, G2 mypy strict, G3 pytest×4 Python, G4 coverage 75%+, G5 CodeQL+pip-audit
+- `security.yml`: CodeQL analysis + pip-audit dependency scanning
+- `pr-quality.yml`: auto-labeling by size (XS/S/M/L/XL) and file path
+- `dependency-review.yml`: license + vulnerability check on PR dependencies
+- `release-drafter.yml`: auto-generated release notes from PR labels
+- `stale.yml`: auto-close inactive issues (60d) and PRs (30d)
+- `auto-merge.yml`: auto-merge dependabot PRs after CI passes
+- `welcome.yml`: welcome message for first-time contributors
+- Branch protection: 4 required CI checks, dismiss stale reviews
+- `.pre-commit-config.yaml`: ruff, mypy, gitleaks, trailing-whitespace
+- `CODEOWNERS`: @kimimgo as default reviewer
+- Contributor recognition tiers in CONTRIBUTING.md
+- MCP protocol compliance test suite (15 tests)
+- Performance benchmark framework (`benchmarks/bench_render.py`)
+- Social preview image (1280×640) for GitHub
+- Launch posts: HN, Reddit (3 subs), Twitter, LinkedIn, Discord drafts
 
 ## [0.1.0] - 2026-03-04
 
