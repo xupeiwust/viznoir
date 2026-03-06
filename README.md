@@ -184,6 +184,13 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed setup, architecture guide, a
 - No simulation steering, multi-physics coupling, or uncertainty quantification
 - When ParaView natively integrates MCP, this wrapper approach may become redundant
 
+## Contributors
+
+<!-- ALL-CONTRIBUTORS-LIST:START -->
+| [<img src="https://avatars.githubusercontent.com/u/21175731?v=4" width="60px;" alt="kimimgo"/><br /><sub><b>kimimgo</b></sub>](https://github.com/kimimgo) | [<img src="https://avatars.githubusercontent.com/u/203002256?v=4" width="60px;" alt="NikanEidi"/><br /><sub><b>NikanEidi</b></sub>](https://github.com/NikanEidi) |
+| :---: | :---: |
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
 ## License
 
 MIT

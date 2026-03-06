@@ -2,7 +2,14 @@
 
 from __future__ import annotations
 
+import os
+
 import pytest
+
+_skip_rendering = pytest.mark.skipif(
+    bool(os.environ.get("CI")),
+    reason="VTK offscreen rendering requires GPU (not available in CI)",
+)
 
 from parapilot.engine.export import (
     _WRITER_MAP,
@@ -58,6 +65,7 @@ class TestExportGltf:
         from parapilot.engine.export import __all__ as all_names
         assert "export_gltf" in all_names
 
+    @_skip_rendering
     @pytest.mark.skipif(
         not hasattr(vtk, "vtkGLTFExporter"),
         reason="vtkGLTFExporter not available in this VTK build",
@@ -76,6 +84,7 @@ class TestExportGltf:
         assert out.exists()
         assert result["size_bytes"] > 0
 
+    @_skip_rendering
     @pytest.mark.skipif(
         not hasattr(vtk, "vtkGLTFExporter"),
         reason="vtkGLTFExporter not available in this VTK build",
