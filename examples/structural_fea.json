@@ -1,0 +1,88 @@
+{
+  "name": "Structural FEA Workflow",
+  "description": "Post-processing workflow for finite element structural analysis. Demonstrates displacement, stress, and deformation visualization.",
+  "steps": [
+    {
+      "name": "Step 1: Inspect mesh and fields",
+      "tool": "inspect_data",
+      "params": {
+        "file_path": "/data/fea/bracket.vtu"
+      },
+      "notes": "Discover displacement, stress, and strain fields in the FEA result."
+    },
+    {
+      "name": "Step 2: Von Mises stress visualization",
+      "tool": "cinematic_render",
+      "params": {
+        "file_path": "/data/fea/bracket.vtu",
+        "field_name": "vonMises",
+        "colormap": "Turbo",
+        "quality": "publication",
+        "output_filename": "vonmises_stress.png"
+      },
+      "notes": "Publication-quality rendering of von Mises stress distribution."
+    },
+    {
+      "name": "Step 3: Displacement magnitude",
+      "tool": "render",
+      "params": {
+        "file_path": "/data/fea/bracket.vtu",
+        "field_name": "displacement",
+        "colormap": "Viridis",
+        "representation": "surface_with_edges"
+      },
+      "notes": "Displacement field with mesh edges visible for mesh quality assessment."
+    },
+    {
+      "name": "Step 4: Cross-section clip",
+      "tool": "clip",
+      "params": {
+        "file_path": "/data/fea/bracket.vtu",
+        "field_name": "vonMises",
+        "origin": [0.05, 0.0, 0.0],
+        "normal": [1.0, 0.0, 0.0],
+        "colormap": "Turbo"
+      },
+      "notes": "Clip at x=0.05 to reveal internal stress distribution."
+    },
+    {
+      "name": "Step 5: Stress hotspot identification",
+      "tool": "contour",
+      "params": {
+        "file_path": "/data/fea/bracket.vtu",
+        "field_name": "vonMises",
+        "values": [200.0],
+        "colormap": "Reds"
+      },
+      "notes": "Iso-surface at 200 MPa to identify stress concentration zones."
+    },
+    {
+      "name": "Step 6: Field statistics",
+      "tool": "extract_stats",
+      "params": {
+        "file_path": "/data/fea/bracket.vtu",
+        "fields": ["vonMises", "displacement"]
+      },
+      "notes": "Extract min/max/mean stress and displacement for safety factor calculation."
+    },
+    {
+      "name": "Step 7: Stress along path",
+      "tool": "plot_over_line",
+      "params": {
+        "file_path": "/data/fea/bracket.vtu",
+        "field_name": "vonMises",
+        "point1": [0.0, 0.0, 0.0],
+        "point2": [0.1, 0.0, 0.0],
+        "resolution": 100
+      },
+      "notes": "Stress distribution along the critical load path for fatigue analysis."
+    }
+  ],
+  "preset": "fea",
+  "recommended_colormaps": {
+    "stress": "Turbo",
+    "displacement": "Viridis",
+    "strain": "Plasma",
+    "safety_factor": "RdYlGn"
+  }
+}

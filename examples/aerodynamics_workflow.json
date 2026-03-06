@@ -1,0 +1,96 @@
+{
+  "name": "External Aerodynamics Workflow",
+  "description": "Post-processing workflow for automotive/aerospace external aerodynamics. Demonstrates pressure and velocity field analysis with streamlines.",
+  "steps": [
+    {
+      "name": "Step 1: Inspect dataset",
+      "tool": "inspect_data",
+      "params": {
+        "file_path": "/data/aero/drivaerml.foam"
+      },
+      "notes": "Discover available fields (p, U, nut, etc.) and timesteps."
+    },
+    {
+      "name": "Step 2: Pressure coefficient overview",
+      "tool": "cinematic_render",
+      "params": {
+        "file_path": "/data/aero/drivaerml.foam",
+        "field_name": "p",
+        "colormap": "Coolwarm",
+        "quality": "cinematic",
+        "timestep": "latest",
+        "output_filename": "cp_overview.png"
+      },
+      "notes": "Publication-quality pressure coefficient render with auto-framing."
+    },
+    {
+      "name": "Step 3: Midplane velocity slice",
+      "tool": "slice",
+      "params": {
+        "file_path": "/data/aero/drivaerml.foam",
+        "field_name": "U",
+        "origin": [0.0, 0.0, 0.0],
+        "normal": [0.0, 1.0, 0.0],
+        "colormap": "Turbo",
+        "timestep": "latest"
+      },
+      "notes": "Midplane (y=0) velocity field to visualize wake structure."
+    },
+    {
+      "name": "Step 4: Streamlines visualization",
+      "tool": "streamlines",
+      "params": {
+        "file_path": "/data/aero/drivaerml.foam",
+        "field_name": "U",
+        "n_seeds": 200,
+        "colormap": "Viridis",
+        "timestep": "latest"
+      },
+      "notes": "Flow field streamlines to visualize separation, recirculation, and wake."
+    },
+    {
+      "name": "Step 5: Velocity profile in wake",
+      "tool": "plot_over_line",
+      "params": {
+        "file_path": "/data/aero/drivaerml.foam",
+        "field_name": "U",
+        "point1": [2.0, 0.0, 0.5],
+        "point2": [2.0, 0.0, -0.5],
+        "resolution": 200,
+        "timestep": "latest"
+      },
+      "notes": "Vertical velocity profile 2m behind the body to quantify wake deficit."
+    },
+    {
+      "name": "Step 6: Force integration",
+      "tool": "integrate_surface",
+      "params": {
+        "file_path": "/data/aero/drivaerml.foam",
+        "field_name": "p",
+        "boundary": "body",
+        "timestep": "latest"
+      },
+      "notes": "Integrate pressure over body surface for drag/lift force estimation."
+    },
+    {
+      "name": "Step 7: Side-by-side comparison",
+      "tool": "compare",
+      "params": {
+        "file_path_a": "/data/aero/baseline.foam",
+        "file_path_b": "/data/aero/modified.foam",
+        "field_name": "p",
+        "mode": "side_by_side",
+        "colormap": "Coolwarm",
+        "timestep": "latest"
+      },
+      "notes": "Compare baseline vs modified geometry pressure distributions."
+    }
+  ],
+  "preset": "cfd",
+  "recommended_colormaps": {
+    "pressure": "Coolwarm",
+    "velocity": "Turbo",
+    "streamlines": "Viridis",
+    "turbulence": "Plasma"
+  }
+}

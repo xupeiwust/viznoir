@@ -66,6 +66,8 @@ Uses OSMesa software rendering — works on any machine without a GPU.
 See [`examples/`](examples/) for complete workflow pipelines:
 
 - **thermal_analysis.json** — Conjugate heat transfer post-processing (8 steps)
+- **aerodynamics_workflow.json** — External aerodynamics: pressure, streamlines, wake analysis (7 steps)
+- **structural_fea.json** — Structural FEA: von Mises stress, displacement, fatigue paths (7 steps)
 
 ## Tools (18)
 
