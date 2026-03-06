@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `preview_3d` tool: glTF/glB export with interactive three.js viewer
 - `batch_render` tool: render multiple fields/timesteps in one call
 - `probe_timeseries` tool: extract field values at a point across all timesteps
+- Per-block styling for multiblock datasets (`render_multiblock()`)
 - meshio fallback reader for 50+ additional mesh formats
 - 5 new VTK filters: SmoothMesh, ProbePoint, CleanPolyData, Shrink, Tube
 - HTTP/SSE transport mode (`--transport sse|streamable-http`)
@@ -32,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Test count: 310 → 1043 (99% coverage)
+- Test count: 310 → 1048 (99% coverage)
 - File format support: 26 → 50+ (via meshio fallback)
 - CI matrix: Python 3.10/3.12 → 3.10/3.11/3.12/3.13
 
