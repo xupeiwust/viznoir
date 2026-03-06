@@ -180,7 +180,7 @@ We welcome contributions! Check out our [open issues](https://github.com/kimimgo
 git clone https://github.com/kimimgo/parapilot
 cd parapilot
 pip install -e ".[dev]"
-pytest                     # 1091 tests
+pytest                     # 1116 tests
 ruff check src/ tests/     # lint
 mypy src/parapilot/        # type check
 ```
@@ -193,7 +193,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed setup, architecture guide, a
 |---|---|---|---|---|---|
 | Focus | General CAE post-processing | ParaView visualization | ETABS/LUSAS FEA | OpenFOAM config | 3D modeling |
 | Rendering | Headless VTK (no GUI) | GUI-attached ParaView | GUI-attached | None | GUI Blender |
-| Tests | 1091 | 0 | 0 | 0 | 0 |
+| Tests | 1116 | 0 | 0 | 0 | 0 |
 | Coverage | 99% | — | — | — | — |
 | Docker | GPU (EGL) + CPU (OSMesa) | No | No | No | No |
 | MCP Tools | 18 | 23 | N/A | N/A | N/A |

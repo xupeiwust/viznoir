@@ -43,7 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Test count: 310 → 1091 (99% coverage)
+- Test count: 310 → 1116 (99% coverage)
 - CI coverage threshold: 75% → 80%
 - File format support: 26 → 50+ (via meshio fallback)
 - CI matrix: Python 3.10/3.12 → 3.10/3.11/3.12/3.13
@@ -73,6 +73,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `CODEOWNERS`: @kimimgo as default reviewer
 - Contributor recognition tiers in CONTRIBUTING.md
 - MCP protocol compliance test suite (14 tests)
+- Mutation testing framework (mutmut) for test quality verification
+- Module-level resource/prompt registration (no `main()` call required)
 - Performance benchmark framework (`benchmarks/bench_render.py`)
 - Social preview image (1280×640) for GitHub
 - Launch posts: HN, Reddit (3 subs), Twitter, LinkedIn, Discord drafts
