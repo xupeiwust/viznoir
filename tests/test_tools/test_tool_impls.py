@@ -316,6 +316,106 @@ class TestPreview3dImpl:
 
 
 # ---------------------------------------------------------------------------
+# render_impl
+# ---------------------------------------------------------------------------
+
+class TestRenderImpl:
+    @pytest.mark.asyncio
+    @patch("parapilot.tools.render.execute_pipeline")
+    async def test_render_builds_pipeline(self, mock_exec):
+        from parapilot.tools.render import render_impl
+
+        mock_exec.return_value = _mock_pipeline_result()
+        runner = MagicMock()
+
+        await render_impl(
+            file_path="/data/case.vtk",
+            field_name="pressure",
+            runner=runner,
+        )
+
+        mock_exec.assert_called_once()
+        pipeline_def = mock_exec.call_args[0][0]
+        assert pipeline_def.source.file == "/data/case.vtk"
+        assert pipeline_def.output.type == "image"
+        assert pipeline_def.output.render.field == "pressure"
+
+    @pytest.mark.asyncio
+    @patch("parapilot.tools.render.execute_pipeline")
+    async def test_render_with_zoom(self, mock_exec):
+        from parapilot.tools.render import render_impl
+
+        mock_exec.return_value = _mock_pipeline_result()
+        runner = MagicMock()
+
+        await render_impl(
+            file_path="/data/case.vtk",
+            field_name="velocity",
+            runner=runner,
+            zoom=2.5,
+        )
+
+        pipeline_def = mock_exec.call_args[0][0]
+        assert pipeline_def.output.render.camera.zoom == 2.5
+
+    @pytest.mark.asyncio
+    @patch("parapilot.tools.render.execute_pipeline")
+    async def test_render_with_background(self, mock_exec):
+        from parapilot.tools.render import render_impl
+
+        mock_exec.return_value = _mock_pipeline_result()
+        runner = MagicMock()
+
+        await render_impl(
+            file_path="/data/case.vtk",
+            field_name="temperature",
+            runner=runner,
+            background=[0.1, 0.2, 0.3],
+        )
+
+        pipeline_def = mock_exec.call_args[0][0]
+        assert pipeline_def.output.render.background == [0.1, 0.2, 0.3]
+
+    @pytest.mark.asyncio
+    @patch("parapilot.tools.render.execute_pipeline")
+    async def test_render_with_all_options(self, mock_exec):
+        from parapilot.tools.render import render_impl
+
+        mock_exec.return_value = _mock_pipeline_result()
+        runner = MagicMock()
+
+        await render_impl(
+            file_path="/data/case.vtk",
+            field_name="pressure",
+            runner=runner,
+            association="CELLS",
+            colormap="Plasma",
+            camera="top",
+            scalar_range=[0.0, 100.0],
+            width=800,
+            height=600,
+            timestep="latest",
+            blocks=["inlet", "outlet"],
+            zoom=1.5,
+            background=[1.0, 1.0, 1.0],
+            output_filename="my_render.png",
+        )
+
+        pipeline_def = mock_exec.call_args[0][0]
+        render_def = pipeline_def.output.render
+        assert render_def.association == "CELLS"
+        assert render_def.colormap == "Plasma"
+        assert render_def.camera.preset == "top"
+        assert render_def.camera.zoom == 1.5
+        assert render_def.scalar_range == [0.0, 100.0]
+        assert render_def.resolution == [800, 600]
+        assert render_def.output_filename == "my_render.png"
+        assert render_def.background == [1.0, 1.0, 1.0]
+        assert pipeline_def.source.timestep == "latest"
+        assert pipeline_def.source.blocks == ["inlet", "outlet"]
+
+
+# ---------------------------------------------------------------------------
 # batch_render_impl
 # ---------------------------------------------------------------------------
 
@@ -389,3 +489,46 @@ class TestBatchRenderImpl:
             assert "base64" in img
             assert "field" in img
             assert img["size_bytes"] > 0
+
+    @pytest.mark.asyncio
+    @patch("parapilot.tools.batch.cinematic_render")
+    @patch("parapilot.tools.batch.read_dataset")
+    @patch("parapilot.tools.batch.get_timesteps")
+    async def test_batch_render_latest_timestep(self, mock_ts, mock_read, mock_cine):
+        from parapilot.tools.batch import batch_render_impl
+
+        mock_ts.return_value = [0.0, 1.0, 2.0]
+        mock_read.return_value = MagicMock()
+        mock_cine.return_value = b"\x89PNG\r\n\x1a\nfake"
+        runner = MagicMock()
+
+        result = await batch_render_impl(
+            file_path="/data/case.vtk",
+            fields=["pressure"],
+            runner=runner,
+            timestep="latest",
+        )
+
+        assert result["count"] == 1
+        mock_ts.assert_called_with("/data/case.vtk")
+        mock_read.assert_called_with("/data/case.vtk", timestep=2.0)
+
+    @pytest.mark.asyncio
+    @patch("parapilot.tools.batch.cinematic_render")
+    @patch("parapilot.tools.batch.read_dataset")
+    async def test_batch_render_string_timestep(self, mock_read, mock_cine):
+        from parapilot.tools.batch import batch_render_impl
+
+        mock_read.return_value = MagicMock()
+        mock_cine.return_value = b"\x89PNG\r\n\x1a\nfake"
+        runner = MagicMock()
+
+        result = await batch_render_impl(
+            file_path="/data/case.vtk",
+            fields=["temperature"],
+            runner=runner,
+            timestep="1.5",
+        )
+
+        assert result["count"] == 1
+        mock_read.assert_called_with("/data/case.vtk", timestep=1.5)
