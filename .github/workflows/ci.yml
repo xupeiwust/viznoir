@@ -22,10 +22,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          cache: pip
 
       - name: Install dependencies
-        run: |
-          pip install -e ".[dev]"
+        run: pip install -e ".[dev]"
 
       - name: Lint (ruff)
         run: ruff check src/ tests/
@@ -34,6 +34,8 @@ jobs:
         run: mypy src/parapilot/ --ignore-missing-imports
 
       - name: Test (pytest)
+        env:
+          VTK_DEFAULT_OPENGL_WINDOW: vtkOSOpenGLRenderWindow
         run: pytest --cov=parapilot --cov-report=term-missing --cov-report=xml -q
 
       - name: Upload coverage to Codecov

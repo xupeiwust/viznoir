@@ -16,7 +16,7 @@ from parapilot.core.compiler import ScriptCompiler
 _IS_CI = bool(os.environ.get("CI"))
 
 # Test files/classes that require VTK GPU rendering (segfault in CI).
-# Centralized here so we never need to touch individual test files again.
+# All *_vtk.py files are also auto-skipped via endswith("_vtk.py") pattern below.
 _RENDERING_TEST_FILES = {
     "test_e2e_production.py",
     "test_renderer_cine.py",
