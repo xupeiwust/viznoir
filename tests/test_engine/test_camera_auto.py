@@ -17,6 +17,7 @@ from parapilot.engine.camera_auto import (
     _shape_to_angles,
     analyze_shape,
     auto_camera_from_bounds,
+    extract_surface_points,
 )
 
 # ---------------------------------------------------------------------------
@@ -289,3 +290,119 @@ class TestAutoCameraFromBounds:
         dist_50 = math.sqrt(sum((p - f)**2 for p, f in zip(cam_50.position, cam_50.focal_point)))
         dist_90 = math.sqrt(sum((p - f)**2 for p, f in zip(cam_90.position, cam_90.focal_point)))
         assert dist_90 < dist_50
+
+    def test_orthographic_projection(self):
+        bounds = (-1.0, 1.0, -1.0, 1.0, -1.0, 1.0)
+        cam = auto_camera_from_bounds(bounds, orthographic=True)
+        assert cam.parallel_projection is True
+        assert cam.parallel_scale is not None
+        assert cam.parallel_scale > 0
+
+
+class TestComputeFrustumDistanceParallel:
+    """Test _compute_frustum_distance when view_dir is parallel to view_up."""
+
+    def test_view_dir_parallel_up_z_axis(self):
+        """When view_dir and view_up are both Z, should not crash."""
+        points = np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0]], dtype=np.float64)
+        center = np.array([0.5, 0.5, 0.0])
+        view_dir = np.array([0.0, 0.0, 1.0])
+        view_up = np.array([0.0, 0.0, 1.0])
+        dist = _compute_frustum_distance(points, center, view_dir, view_up)
+        assert dist > 0
+
+    def test_view_dir_parallel_up_x_axis(self):
+        """When view_dir is [1,0,0] and up is [1,0,0], should use fallback."""
+        points = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 1]], dtype=np.float64)
+        center = np.array([0.0, 0.5, 0.5])
+        view_dir = np.array([1.0, 0.0, 0.0])
+        view_up = np.array([1.0, 0.0, 0.0])
+        dist = _compute_frustum_distance(points, center, view_dir, view_up)
+        assert dist > 0
+
+
+class TestResolveViewUpEdgeCases:
+    """Test _resolve_view_up with parallel view direction."""
+
+    def test_view_dir_parallel_to_default_up_z(self):
+        """When view_dir is along Z, should pick perpendicular up."""
+        view_dir = np.array([0.0, 0.0, 1.0])
+        view_up = np.array([0.0, 0.0, 1.0])
+        result = _resolve_view_up(view_dir, view_up)
+        # Result should be perpendicular to view_dir
+        dot = abs(np.dot(result / np.linalg.norm(result), view_dir))
+        assert dot < 0.1
+
+    def test_view_dir_parallel_to_default_up_nonz(self):
+        """When view_dir is along a non-Z axis and parallel to up."""
+        view_dir = np.array([1.0, 0.0, 0.0])
+        view_up = np.array([1.0, 0.0, 0.0])
+        result = _resolve_view_up(view_dir, view_up)
+        dot = abs(np.dot(result / np.linalg.norm(result), view_dir / np.linalg.norm(view_dir)))
+        assert dot < 0.1
+
+
+class TestAutoCameraWithVTK:
+    """Tests requiring VTK for auto_camera with real datasets."""
+    vtk = pytest.importorskip("vtk")
+
+    def test_auto_camera_empty_polydata(self):
+        """auto_camera with empty polydata falls back to bounds."""
+        import vtk
+
+        from parapilot.engine.camera_auto import auto_camera
+
+        pd = vtk.vtkPolyData()
+        # No points set → empty
+        cam = auto_camera(pd)
+        assert isinstance(cam, CameraConfig)
+
+    def test_auto_camera_with_points(self):
+        """auto_camera with real polydata produces valid camera."""
+        import vtk
+
+        from parapilot.engine.camera_auto import auto_camera
+
+        pd = vtk.vtkPolyData()
+        pts = vtk.vtkPoints()
+        for x in range(10):
+            for y in range(10):
+                pts.InsertNextPoint(float(x), float(y), 0.0)
+        pd.SetPoints(pts)
+
+        cam = auto_camera(pd)
+        assert isinstance(cam, CameraConfig)
+        # Camera should be above the XY plane for a flat plate
+        assert cam.position[2] > 0.0
+
+    def test_auto_camera_orthographic(self):
+        """auto_camera with orthographic projection."""
+        import vtk
+
+        from parapilot.engine.camera_auto import auto_camera
+
+        pd = vtk.vtkPolyData()
+        pts = vtk.vtkPoints()
+        pts.InsertNextPoint(0, 0, 0)
+        pts.InsertNextPoint(1, 0, 0)
+        pts.InsertNextPoint(0, 1, 0)
+        pd.SetPoints(pts)
+
+        cam = auto_camera(pd, orthographic=True)
+        assert cam.parallel_projection is True
+        assert cam.parallel_scale is not None
+
+    def test_extract_surface_points_subsampling(self):
+        """extract_surface_points subsamples large point sets."""
+        import vtk
+
+
+        pd = vtk.vtkPolyData()
+        pts = vtk.vtkPoints()
+        for i in range(20000):
+            pts.InsertNextPoint(float(i), 0.0, 0.0)
+        pd.SetPoints(pts)
+
+        # max_points < num_points triggers subsampling
+        result = extract_surface_points(pd, max_points=1000)
+        assert result.shape[0] == 1000
