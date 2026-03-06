@@ -507,38 +507,101 @@ class TestValidateFilePathSuggestions:
 
 
 # ---------------------------------------------------------------------------
+# _register_resources / _register_prompts
+# ---------------------------------------------------------------------------
+
+
+class TestRegistrations:
+    def test_register_resources(self):
+        from parapilot.server import _register_resources
+        with patch("parapilot.resources.catalog.register_resources") as mock_reg:
+            _register_resources()
+            mock_reg.assert_called_once()
+
+    def test_register_prompts(self):
+        from parapilot.server import _register_prompts
+        with patch("parapilot.prompts.guides.register_prompts") as mock_reg:
+            _register_prompts()
+            mock_reg.assert_called_once()
+
+
+# ---------------------------------------------------------------------------
 # _protect_stdout
 # ---------------------------------------------------------------------------
 
 
 class TestProtectStdout:
-    def test_protect_stdout_redirects(self):
-        """Verify _protect_stdout works without crashing."""
+    def test_protect_stdout_redirects_fd1(self):
+        """_protect_stdout redirects fd 1 and wraps sys.stdout."""
+        import io
         import sys
+
+        from parapilot.server import _protect_stdout
+
         original_stdout = sys.stdout
-        try:
-            from parapilot.server import _protect_stdout
-            _protect_stdout()
-            sys.stdout.write("test\n")
-            sys.stdout.flush()
-        finally:
-            sys.stdout = original_stdout
+
+        _protect_stdout()
+
+        # sys.stdout should now be a TextIOWrapper on a saved fd
+        assert isinstance(sys.stdout, io.TextIOWrapper)
+        # Writing should still work
+        sys.stdout.write("test\n")
+        sys.stdout.flush()
+
+        # Restore for other tests
+        sys.stdout = original_stdout
 
 
 # ---------------------------------------------------------------------------
-# main() and _register_*
+# main() entry point
 # ---------------------------------------------------------------------------
 
 
-class TestMainAndHelpers:
-    def test_main_exists(self):
-        from parapilot.server import main
-        assert callable(main)
+class TestMain:
+    def test_main_stdio(self):
+        """main() with stdio transport calls mcp.run()."""
+        with patch("sys.argv", ["mcp-server-parapilot"]), \
+             patch("parapilot.server._protect_stdout"), \
+             patch("parapilot.server._register_resources"), \
+             patch("parapilot.server._register_prompts"), \
+             patch("parapilot.server.mcp") as mock_mcp, \
+             patch("parapilot.server.VTKRunner") as mock_runner_cls:
+            mock_runner_cls.cleanup_orphaned_containers = AsyncMock(return_value=0)
+            from parapilot.server import main
+            main()
+            mock_mcp.run.assert_called_once_with()
 
-    def test_register_resources_callable(self):
-        from parapilot.server import _register_resources
-        assert callable(_register_resources)
+    def test_main_sse(self):
+        """main() with sse transport passes host/port."""
+        with patch("sys.argv", ["mcp-server-parapilot", "--transport", "sse", "--port", "9000"]), \
+             patch("parapilot.server._protect_stdout"), \
+             patch("parapilot.server._register_resources"), \
+             patch("parapilot.server._register_prompts"), \
+             patch("parapilot.server.mcp") as mock_mcp, \
+             patch("parapilot.server.VTKRunner") as mock_runner_cls:
+            mock_runner_cls.cleanup_orphaned_containers = AsyncMock(return_value=0)
+            from parapilot.server import main
+            main()
+            mock_mcp.run.assert_called_once_with(
+                transport="sse", host="0.0.0.0", port=9000
+            )
 
-    def test_register_prompts_callable(self):
-        from parapilot.server import _register_prompts
-        assert callable(_register_prompts)
+    def test_main_streamable_http(self):
+        """main() with streamable-http transport."""
+        with patch(
+            "sys.argv",
+            ["mcp-server-parapilot", "--transport", "streamable-http"],
+        ), \
+             patch("parapilot.server._protect_stdout"), \
+             patch("parapilot.server._register_resources"), \
+             patch("parapilot.server._register_prompts"), \
+             patch("parapilot.server.mcp") as mock_mcp, \
+             patch("parapilot.server.VTKRunner") as mock_runner_cls:
+            mock_runner_cls.cleanup_orphaned_containers = AsyncMock(return_value=0)
+            from parapilot.server import main
+            main()
+            mock_mcp.run.assert_called_once_with(
+                transport="streamable-http", host="0.0.0.0", port=8000
+            )
+
+

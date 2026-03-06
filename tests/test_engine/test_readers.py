@@ -297,3 +297,249 @@ class TestMeshioFallback:
 
         expected = {"vertex", "line", "triangle", "quad", "tetra", "hexahedron", "wedge", "pyramid"}
         assert expected.issubset(set(_MESHIO_TO_VTK_TYPE.keys()))
+
+    def test_meshio_fallback_read_fails(self, tmp_path):
+        """Test meshio fallback when meshio is available but read fails."""
+        from parapilot.engine.readers import DataReader
+        from parapilot.errors import FileFormatError
+
+        bad_file = tmp_path / "file.med"
+        bad_file.write_text("not a real mesh")
+
+        reader = DataReader(bad_file)
+        mock_meshio = MagicMock()
+        mock_meshio.read.side_effect = Exception("Cannot read")
+
+        with patch.dict("sys.modules", {"meshio": mock_meshio}):
+            with pytest.raises(FileFormatError, match="meshio also failed"):
+                reader.read()
+
+
+# ---------------------------------------------------------------------------
+# DataReader close / timestep / properties
+# ---------------------------------------------------------------------------
+
+class TestDataReaderProperties:
+    def test_close_releases_reader(self, tmp_path):
+        from parapilot.engine.readers import DataReader
+
+        vtk_file = tmp_path / "test.vtk"
+        vtk_file.write_text("# vtk DataFile Version 2.0\n")
+        reader = DataReader(vtk_file)
+        reader.close()
+        assert reader.timesteps == []
+
+    def test_path_property(self, tmp_path):
+        from parapilot.engine.readers import DataReader
+
+        vtk_file = tmp_path / "test.vtk"
+        vtk_file.write_text("# vtk\n")
+        reader = DataReader(vtk_file)
+        assert reader.path == vtk_file.resolve()
+
+
+# ---------------------------------------------------------------------------
+# _extract_info / _get_array_names / _get_block_names / _first_leaf
+# ---------------------------------------------------------------------------
+
+class TestExtractInfo:
+    vtk = pytest.importorskip("vtk")
+
+    def test_extract_info_from_polydata(self):
+        import vtk
+
+        from parapilot.engine.readers import _extract_info
+
+        pd = vtk.vtkPolyData()
+        pts = vtk.vtkPoints()
+        pts.InsertNextPoint(0, 0, 0)
+        pts.InsertNextPoint(1, 0, 0)
+        pd.SetPoints(pts)
+
+        info = _extract_info(pd, "/test.vtp", "vtkXMLPolyDataReader", [0.0, 1.0])
+        assert info.num_points == 2
+        assert info.timesteps == [0.0, 1.0]
+        assert info.reader_type == "vtkXMLPolyDataReader"
+
+    def test_extract_info_from_multiblock(self):
+        import vtk
+
+        from parapilot.engine.readers import _extract_info
+
+        mb = vtk.vtkMultiBlockDataSet()
+        pd = vtk.vtkPolyData()
+        pts = vtk.vtkPoints()
+        pts.InsertNextPoint(0, 0, 0)
+        pd.SetPoints(pts)
+        mb.SetBlock(0, pd)
+
+        info = _extract_info(mb, "/test.vtm", "vtkXMLMultiBlockDataReader", [])
+        assert info.num_blocks == 1
+        assert info.num_points == 1
+
+    def test_extract_info_empty_multiblock(self):
+        import vtk
+
+        from parapilot.engine.readers import _extract_info
+
+        mb = vtk.vtkMultiBlockDataSet()
+        info = _extract_info(mb, "/test.vtm", "vtkXMLMultiBlockDataReader", [])
+        assert info.num_blocks == 0
+        assert info.num_points == 0
+
+
+class TestGetBlockNames:
+    vtk = pytest.importorskip("vtk")
+
+    def test_named_blocks(self):
+        import vtk
+
+        from parapilot.engine.readers import _get_block_names
+
+        mb = vtk.vtkMultiBlockDataSet()
+        pd = vtk.vtkPolyData()
+        mb.SetBlock(0, pd)
+        mb.GetMetaData(0).Set(mb.NAME(), "internalMesh")
+
+        names = _get_block_names(mb)
+        assert names == ["internalMesh"]
+
+    def test_unnamed_blocks(self):
+        import vtk
+
+        from parapilot.engine.readers import _get_block_names
+
+        mb = vtk.vtkMultiBlockDataSet()
+        mb.SetBlock(0, vtk.vtkPolyData())
+        names = _get_block_names(mb)
+        assert names == ["Block_0"]
+
+
+class TestFirstLeaf:
+    vtk = pytest.importorskip("vtk")
+
+    def test_first_leaf_simple(self):
+        import vtk
+
+        from parapilot.engine.readers import _first_leaf
+
+        mb = vtk.vtkMultiBlockDataSet()
+        pd = vtk.vtkPolyData()
+        mb.SetBlock(0, pd)
+        assert _first_leaf(mb) is pd
+
+    def test_first_leaf_nested(self):
+        import vtk
+
+        from parapilot.engine.readers import _first_leaf
+
+        outer = vtk.vtkMultiBlockDataSet()
+        inner = vtk.vtkMultiBlockDataSet()
+        pd = vtk.vtkPolyData()
+        inner.SetBlock(0, pd)
+        outer.SetBlock(0, inner)
+        assert _first_leaf(outer) is pd
+
+    def test_first_leaf_empty(self):
+        import vtk
+
+        from parapilot.engine.readers import _first_leaf
+
+        mb = vtk.vtkMultiBlockDataSet()
+        assert _first_leaf(mb) is None
+
+    def test_first_leaf_skips_none(self):
+        import vtk
+
+        from parapilot.engine.readers import _first_leaf
+
+        mb = vtk.vtkMultiBlockDataSet()
+        mb.SetNumberOfBlocks(2)
+        # Block 0 is None
+        pd = vtk.vtkPolyData()
+        mb.SetBlock(1, pd)
+        assert _first_leaf(mb) is pd
+
+
+class TestExtractBlocks:
+    vtk = pytest.importorskip("vtk")
+
+    def test_extract_named_block(self):
+        import vtk
+
+        from parapilot.engine.readers import _extract_blocks
+
+        mb = vtk.vtkMultiBlockDataSet()
+        pd1 = vtk.vtkPolyData()
+        pd2 = vtk.vtkPolyData()
+        pts = vtk.vtkPoints()
+        pts.InsertNextPoint(1, 2, 3)
+        pd2.SetPoints(pts)
+        mb.SetBlock(0, pd1)
+        mb.SetBlock(1, pd2)
+        mb.GetMetaData(0).Set(mb.NAME(), "wall")
+        mb.GetMetaData(1).Set(mb.NAME(), "inlet")
+
+        result = _extract_blocks(mb, ["inlet"])
+        assert result is pd2
+
+    def test_extract_blocks_fallback(self):
+        import vtk
+
+        from parapilot.engine.readers import _extract_blocks
+
+        mb = vtk.vtkMultiBlockDataSet()
+        pd = vtk.vtkPolyData()
+        mb.SetBlock(0, pd)
+        mb.GetMetaData(0).Set(mb.NAME(), "wall")
+
+        result = _extract_blocks(mb, ["nonexistent"])
+        assert result is pd
+
+
+class TestGetArrayNames:
+    vtk = pytest.importorskip("vtk")
+
+    def test_none_input(self):
+        from parapilot.engine.readers import _get_array_names
+
+        assert _get_array_names(None) == []
+
+    def test_with_arrays(self):
+        import numpy as np
+        import vtk
+        from vtk.util.numpy_support import numpy_to_vtk
+
+        from parapilot.engine.readers import _get_array_names
+
+        pd = vtk.vtkPolyData()
+        arr = numpy_to_vtk(np.array([1.0, 2.0, 3.0]))
+        arr.SetName("pressure")
+        pd.GetPointData().AddArray(arr)
+
+        names = _get_array_names(pd.GetPointData())
+        assert "pressure" in names
+
+
+class TestExtractTimesteps:
+    vtk = pytest.importorskip("vtk")
+
+    def test_no_executive(self):
+        from unittest.mock import MagicMock
+
+        from parapilot.engine.readers import _extract_timesteps
+
+        reader = MagicMock()
+        reader.GetExecutive.return_value = None
+        assert _extract_timesteps(reader) == []
+
+    def test_no_output_info(self):
+        from unittest.mock import MagicMock
+
+        from parapilot.engine.readers import _extract_timesteps
+
+        exe = MagicMock()
+        exe.GetOutputInformation.return_value = None
+        reader = MagicMock()
+        reader.GetExecutive.return_value = exe
+        assert _extract_timesteps(reader) == []

@@ -485,6 +485,309 @@ class TestCompileVideo:
         assert len(video_bytes) > 100
 
 
+class TestExecutePipeline:
+    """Tests for execute_pipeline and execute_split_animation (mock runner/compiler)."""
+
+    @pytest.mark.asyncio
+    async def test_execute_pipeline_basic(self):
+        """execute_pipeline runs compile→execute→parse flow."""
+        from unittest.mock import AsyncMock, MagicMock
+
+        from parapilot.core.output import PipelineResult
+        from parapilot.core.runner import RunResult
+        from parapilot.pipeline.engine import execute_pipeline
+
+        pipeline = PipelineDefinition(
+            source=SourceDef(file="/data/case.vtk"),
+            pipeline=[],
+            output=OutputDef(
+                type="image",
+                render=RenderDef(field="p"),
+            ),
+        )
+
+        mock_runner = MagicMock()
+        run_result = RunResult(
+            exit_code=0,
+            stdout="",
+            stderr="",
+            output_file_data={"render.png": b"\x89PNG"},
+            json_result=None,
+        )
+        mock_runner.execute = AsyncMock(return_value=run_result)
+
+        mock_compiler = MagicMock()
+        mock_compiler.compile.return_value = "print('hello')"
+
+        mock_output = MagicMock()
+        mock_output.parse.return_value = PipelineResult(
+            output_type="image",
+            image_bytes=b"\x89PNG",
+            json_data={"type": "image"},
+        )
+
+        result = await execute_pipeline(pipeline, mock_runner, mock_compiler, mock_output)
+        assert result.output_type == "image"
+        assert result.image_bytes == b"\x89PNG"
+        mock_compiler.compile.assert_called_once()
+        mock_runner.execute.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_execute_pipeline_validation_error(self):
+        """execute_pipeline raises ValueError on invalid pipeline."""
+        from unittest.mock import MagicMock
+
+        from parapilot.pipeline.engine import execute_pipeline
+
+        pipeline = PipelineDefinition(
+            source=SourceDef(file="/data/case.xyz"),
+            pipeline=[],
+            output=OutputDef(type="image", render=RenderDef(field="p")),
+        )
+
+        mock_runner = MagicMock()
+        with pytest.raises(ValueError, match="Invalid pipeline"):
+            await execute_pipeline(pipeline, mock_runner)
+
+    @pytest.mark.asyncio
+    async def test_execute_pipeline_with_video_compilation(self):
+        """execute_pipeline compiles video when animation output with frames."""
+        from unittest.mock import AsyncMock, MagicMock, patch
+
+        from parapilot.core.output import PipelineResult
+        from parapilot.core.runner import RunResult
+        from parapilot.pipeline.engine import execute_pipeline
+        from parapilot.pipeline.models import AnimationDef
+
+        pipeline = PipelineDefinition(
+            source=SourceDef(file="/data/case.vtk"),
+            pipeline=[],
+            output=OutputDef(
+                type="animation",
+                animation=AnimationDef(
+                    render=RenderDef(field="p"),
+                    fps=10,
+                    output_format="mp4",
+                ),
+                render=RenderDef(field="p"),
+            ),
+        )
+
+        run_result = RunResult(
+            exit_code=0, stdout="", stderr="",
+            output_file_data={"frame_000000.png": b"\x89PNG", "frame_000001.png": b"\x89PNG"},
+            json_result={"effective_fps": 10.0},
+        )
+        mock_runner = MagicMock()
+        mock_runner.execute = AsyncMock(return_value=run_result)
+
+        mock_compiler = MagicMock()
+        mock_compiler.compile.return_value = "script"
+
+        mock_output = MagicMock()
+        mock_output.parse.return_value = PipelineResult(
+            output_type="animation",
+            image_bytes=None,
+            json_data={"type": "animation"},
+        )
+
+        with patch(
+            "parapilot.pipeline.engine.compile_video",
+            new_callable=AsyncMock,
+            return_value=(b"fake_video_data", None),
+        ):
+            result = await execute_pipeline(
+                pipeline, mock_runner, mock_compiler, mock_output
+            )
+        assert result.image_bytes == b"fake_video_data"
+        assert result.json_data["video_format"] == "mp4"
+
+    @pytest.mark.asyncio
+    async def test_execute_pipeline_video_error(self):
+        """execute_pipeline records video_error when compile_video fails."""
+        from unittest.mock import AsyncMock, MagicMock, patch
+
+        from parapilot.core.output import PipelineResult
+        from parapilot.core.runner import RunResult
+        from parapilot.pipeline.engine import execute_pipeline
+        from parapilot.pipeline.models import AnimationDef
+
+        pipeline = PipelineDefinition(
+            source=SourceDef(file="/data/case.vtk"),
+            pipeline=[],
+            output=OutputDef(
+                type="animation",
+                animation=AnimationDef(render=RenderDef(field="p"), fps=10, output_format="mp4"),
+                render=RenderDef(field="p"),
+            ),
+        )
+
+        run_result = RunResult(
+            exit_code=0, stdout="", stderr="",
+            output_file_data={"frame_000000.png": b"x"},
+            json_result=None,
+        )
+        mock_runner = MagicMock()
+        mock_runner.execute = AsyncMock(return_value=run_result)
+        mock_compiler = MagicMock()
+        mock_compiler.compile.return_value = "s"
+        mock_output = MagicMock()
+        mock_output.parse.return_value = PipelineResult(
+            output_type="animation", image_bytes=None, json_data=None,
+        )
+
+        with patch(
+            "parapilot.pipeline.engine.compile_video",
+            new_callable=AsyncMock,
+            return_value=(None, "ffmpeg not found"),
+        ):
+            result = await execute_pipeline(
+                pipeline, mock_runner, mock_compiler, mock_output
+            )
+        assert result.json_data["video_error"] == "ffmpeg not found"
+
+    @pytest.mark.asyncio
+    async def test_execute_split_animation(self):
+        """execute_split_animation runs two-phase pipeline."""
+        from unittest.mock import AsyncMock, MagicMock, patch
+
+        from parapilot.core.runner import RunResult
+        from parapilot.pipeline.engine import execute_split_animation
+        from parapilot.pipeline.models import (
+            GraphPaneDef,
+            GraphSeriesDef,
+            LayoutDef,
+            PaneDef,
+            RenderPaneDef,
+            SplitAnimationDef,
+        )
+
+        pipeline = PipelineDefinition(
+            source=SourceDef(file="/data/case.vtk"),
+            pipeline=[],
+            output=OutputDef(
+                type="split_animation",
+                split_animation=SplitAnimationDef(
+                    panes=[
+                        PaneDef(
+                            type="render", row=0, col=0,
+                            render_pane=RenderPaneDef(
+                                render=RenderDef(field="p")
+                            ),
+                        ),
+                        PaneDef(
+                            type="graph", row=0, col=1,
+                            graph_pane=GraphPaneDef(
+                                series=[GraphSeriesDef(field="p", stat="mean")]
+                            ),
+                        ),
+                    ],
+                    layout=LayoutDef(rows=1, cols=2),
+                ),
+            ),
+        )
+
+        run_result = RunResult(
+            exit_code=0, stdout="", stderr="",
+            output_file_data={
+                "frame_000000.png": b"\x89PNG",
+                "stats.json": b'{"p_mean": [1.0, 2.0]}',
+            },
+            json_result={"frame_count": 1, "effective_fps": 5.0},
+        )
+        mock_runner = MagicMock()
+        mock_runner.execute = AsyncMock(return_value=run_result)
+        mock_compiler = MagicMock()
+        mock_compiler.compile.return_value = "script"
+
+        mock_compositor = MagicMock()
+        mock_compositor.compose_all.return_value = (
+            [b"composed_frame"],
+            b"GIF89a_fake",
+        )
+
+        with patch(
+            "parapilot.core.compositor.Compositor",
+            return_value=mock_compositor,
+        ):
+            result = await execute_split_animation(
+                pipeline, mock_runner, mock_compiler
+            )
+        assert result.output_type == "split_animation"
+        assert result.image_bytes == b"GIF89a_fake"
+        assert result.json_data["frame_count"] == 1
+
+    @pytest.mark.asyncio
+    async def test_execute_split_animation_no_split_def(self):
+        """execute_split_animation raises on missing split_animation."""
+        from unittest.mock import MagicMock
+
+        from parapilot.pipeline.engine import execute_split_animation
+
+        pipeline = PipelineDefinition(
+            source=SourceDef(file="/data/case.vtk"),
+            pipeline=[],
+            output=OutputDef(type="split_animation"),
+        )
+        mock_runner = MagicMock()
+        # Validation should catch this first
+        with pytest.raises(ValueError):
+            await execute_split_animation(pipeline, mock_runner)
+
+
+class TestCompileVideoEdgeCases:
+    """Additional compile_video edge cases for coverage."""
+
+    @pytest.mark.asyncio
+    async def test_compile_video_ffmpeg_nonzero_exit(self):
+        """compile_video returns error on ffmpeg non-zero exit."""
+        from unittest.mock import AsyncMock, MagicMock, patch
+
+        from parapilot.pipeline.engine import compile_video
+
+        frames = {"frame_000000.png": b"\x89PNG", "frame_000001.png": b"\x89PNG"}
+
+        mock_proc = MagicMock()
+        mock_proc.returncode = 1
+        mock_proc.communicate = AsyncMock(return_value=(b"", b"encoding error"))
+        mock_proc.kill = MagicMock()
+
+        async def mock_create(*args, **kwargs):
+            return mock_proc
+
+        with patch("shutil.which", return_value="/usr/bin/ffmpeg"), \
+             patch("asyncio.create_subprocess_exec", side_effect=mock_create):
+            video_bytes, error = await compile_video(frames, fps=10.0)
+
+        assert video_bytes is None
+        assert error is not None
+        assert "ffmpeg failed" in error
+
+    @pytest.mark.asyncio
+    async def test_compile_video_no_output_file(self):
+        """compile_video returns error when ffmpeg produces no output."""
+        from unittest.mock import AsyncMock, MagicMock, patch
+
+        from parapilot.pipeline.engine import compile_video
+
+        frames = {"frame_000000.png": b"\x89PNG"}
+
+        mock_proc = MagicMock()
+        mock_proc.returncode = 0
+        mock_proc.communicate = AsyncMock(return_value=(b"", b""))
+
+        async def mock_create(*args, **kwargs):
+            return mock_proc
+
+        with patch("shutil.which", return_value="/usr/bin/ffmpeg"), \
+             patch("asyncio.create_subprocess_exec", side_effect=mock_create):
+            video_bytes, error = await compile_video(frames, fps=10.0)
+
+        assert video_bytes is None
+        assert error is not None
+        assert "no output" in error.lower()
+
+
 class TestPipelineModels:
     def test_pipeline_from_json(self):
         data = {
