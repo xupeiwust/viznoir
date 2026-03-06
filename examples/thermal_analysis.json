@@ -1,0 +1,132 @@
+{
+  "name": "Thermal Analysis Workflow",
+  "description": "Example pipeline for conjugate heat transfer (CHT) post-processing. Demonstrates temperature field visualization with gradient computation for heat flux analysis.",
+  "steps": [
+    {
+      "name": "Step 1: Inspect data",
+      "tool": "inspect_data",
+      "params": {
+        "file_path": "/data/thermal/heatsink.foam"
+      },
+      "notes": "First, explore what fields and timesteps are available."
+    },
+    {
+      "name": "Step 2: Temperature overview",
+      "tool": "cinematic_render",
+      "params": {
+        "file_path": "/data/thermal/heatsink.foam",
+        "field_name": "T",
+        "colormap": "Inferno",
+        "quality": "standard",
+        "timestep": "latest",
+        "output_filename": "temperature_overview.png"
+      },
+      "notes": "Cinematic rendering of temperature field with auto-framing."
+    },
+    {
+      "name": "Step 3: Temperature cross-section",
+      "tool": "slice",
+      "params": {
+        "file_path": "/data/thermal/heatsink.foam",
+        "field_name": "T",
+        "origin": [0.0, 0.0, 0.005],
+        "normal": [0.0, 0.0, 1.0],
+        "colormap": "Inferno",
+        "timestep": "latest"
+      },
+      "notes": "Horizontal slice through the heatsink showing internal temperature gradient."
+    },
+    {
+      "name": "Step 4: Temperature profile along wall",
+      "tool": "plot_over_line",
+      "params": {
+        "file_path": "/data/thermal/heatsink.foam",
+        "field_name": "T",
+        "point1": [0.0, 0.0, 0.0],
+        "point2": [0.1, 0.0, 0.0],
+        "resolution": 200,
+        "timestep": "latest"
+      },
+      "notes": "Extract temperature profile along the heated wall for validation against analytical solution."
+    },
+    {
+      "name": "Step 5: Heat flux via gradient",
+      "tool": "execute_pipeline",
+      "params": {
+        "pipeline": {
+          "source": {
+            "file": "/data/thermal/heatsink.foam",
+            "timestep": "latest"
+          },
+          "pipeline": [
+            {
+              "filter": "Gradient",
+              "params": {
+                "field": "T",
+                "result_name": "gradT"
+              }
+            },
+            {
+              "filter": "Calculator",
+              "params": {
+                "expression": "mag(gradT)",
+                "result_name": "heatFluxMag"
+              }
+            }
+          ],
+          "output": {
+            "type": "image",
+            "render": {
+              "field": "heatFluxMag",
+              "colormap": "Plasma",
+              "camera": "isometric"
+            }
+          }
+        }
+      },
+      "notes": "Compute temperature gradient magnitude as a proxy for heat flux (q = -k * gradT)."
+    },
+    {
+      "name": "Step 6: Statistics summary",
+      "tool": "extract_stats",
+      "params": {
+        "file_path": "/data/thermal/heatsink.foam",
+        "fields": ["T", "U"],
+        "timestep": "latest"
+      },
+      "notes": "Extract min/max/mean/std of temperature and velocity fields."
+    },
+    {
+      "name": "Step 7: Surface heat flux integration",
+      "tool": "integrate_surface",
+      "params": {
+        "file_path": "/data/thermal/heatsink.foam",
+        "field_name": "T",
+        "boundary": "heatedWall",
+        "timestep": "latest"
+      },
+      "notes": "Integrate temperature over the heated wall to compute average wall temperature."
+    },
+    {
+      "name": "Step 8: Time evolution animation",
+      "tool": "animate",
+      "params": {
+        "file_path": "/data/thermal/heatsink.foam",
+        "field_name": "T",
+        "mode": "timesteps",
+        "colormap": "Inferno",
+        "fps": 24,
+        "speed_factor": 5.0,
+        "output_format": "gif"
+      },
+      "notes": "Animate temperature evolution from cold start to steady state at 5x speed."
+    }
+  ],
+  "preset": "thermal",
+  "recommended_colormaps": {
+    "temperature": "Inferno",
+    "temperature_publication": "Black-Body Radiation",
+    "heat_flux": "Plasma",
+    "velocity": "Viridis"
+  }
+}

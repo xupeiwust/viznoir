@@ -20,3 +20,16 @@ services:
     # ports:
     #   - "8000:8000"
     # command: ["mcp-server-parapilot", "--transport", "streamable-http", "--port", "8000"]
+
+  # CPU-only variant — no GPU required (OSMesa software rendering)
+  parapilot-cpu:
+    build:
+      context: .
+      dockerfile: Dockerfile.cpu
+    image: parapilot-cpu:latest
+    volumes:
+      - ${PARAPILOT_DATA_DIR:-./data}:/data:ro
+      - ${PARAPILOT_OUTPUT_DIR:-./output}:/output
+    environment:
+      - PARAPILOT_RENDER_BACKEND=cpu
+      - PARAPILOT_VTK_BACKEND=osmesa
