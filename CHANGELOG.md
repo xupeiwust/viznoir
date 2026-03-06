@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- 5 new MCP tools: `cinematic_render`, `compare`, `probe_timeseries`, `batch_render`, `preview_3d` (total: 18)
+- 1 new MCP resource: `capabilities` (total: 11)
+- Cinematic rendering engine: PCA auto-camera, PBR materials, SSAO, FXAA, 3-point lighting, 5 quality presets
+- `compare` tool: side-by-side, overlay, and difference modes for comparing datasets
+- `preview_3d` tool: glTF/glB export with interactive three.js viewer
+- `batch_render` tool: render multiple fields/timesteps in one call
+- `probe_timeseries` tool: extract field values at a point across all timesteps
+- meshio fallback reader for 50+ additional mesh formats
+- 5 new VTK filters: SmoothMesh, ProbePoint, CleanPolyData, Shrink, Tube
+- HTTP/SSE transport mode (`--transport sse|streamable-http`)
+- Dockerfile.cpu for CPU-only (OSMesa) deployment without GPU
+- MkDocs Material API documentation site (16 pages)
+- Thermal analysis workflow example (`examples/thermal_analysis.json`)
+- JOSS paper draft (`paper/paper.md`)
+- Structured logging framework (`PARAPILOT_LOG_LEVEL` env var)
+- Custom exception hierarchy (`ParapilotError`, `FileFormatError`, etc.)
+- Render window auto-regeneration (every 100 renders) to prevent GPU memory leaks
+- Python 3.11/3.13 CI test matrix
+- Codecov coverage reporting
+- `smithery.yaml` for MCP registry registration
+
+### Changed
+
+- Test count: 310 → 748 (80% coverage)
+- File format support: 26 → 50+ (via meshio fallback)
+- CI matrix: Python 3.10/3.12 → 3.10/3.11/3.12/3.13
+
+### Fixed
+
+- Contour: empty output guard with data range diagnostics
+- Streamlines: auto seed points from dataset bounds
+- Slice/clip: auto origin from dataset center
+- Renderer: reject 0-point datasets in `_resolve_renderable`
+- PNG extraction: O(n) byte-by-byte copy replaced with numpy bulk copy
+
 ## [0.1.0] - 2026-03-04
 
 ### Added
