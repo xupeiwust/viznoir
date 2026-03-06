@@ -62,6 +62,11 @@ class TestFilterRegistry:
         assert "params" in schema
         assert schema["vtk_class"] == "vtkCutter"
 
+    def test_get_filter_case_insensitive_fallback(self):
+        """get_filter with lowercase name falls back to case-insensitive match."""
+        schema = get_filter("slice")
+        assert schema["vtk_class"] == "vtkCutter"
+
     def test_validate_params_defaults(self):
         result = validate_filter_params("Slice", {"origin": [0, 0, 0]})
         assert result["origin"] == [0, 0, 0]
