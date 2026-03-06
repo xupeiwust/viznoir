@@ -314,6 +314,27 @@ class TestPreview3dImpl:
 
         mock_read.assert_called_once_with("/data/case.vtk", timestep=2.0)
 
+    @pytest.mark.asyncio
+    @patch("parapilot.tools.preview3d.export_gltf")
+    @patch("parapilot.tools.preview3d.read_dataset")
+    async def test_preview_3d_string_timestep(self, mock_read, mock_export, tmp_path):
+        """String timestep (not 'latest') is converted to float."""
+        from parapilot.tools.preview3d import preview_3d_impl
+
+        mock_read.return_value = MagicMock()
+        mock_export.return_value = {"path": "p.glb", "format": ".glb", "size_bytes": 512}
+        runner = MagicMock()
+
+        import os
+        with patch.dict(os.environ, {"PARAPILOT_OUTPUT_DIR": str(tmp_path)}):
+            await preview_3d_impl(
+                file_path="/data/case.vtk",
+                runner=runner,
+                timestep="1.5",
+            )
+
+        mock_read.assert_called_once_with("/data/case.vtk", timestep=1.5)
+
 
 # ---------------------------------------------------------------------------
 # slice_impl, streamlines_impl (zoom branch coverage)
