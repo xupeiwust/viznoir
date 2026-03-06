@@ -53,6 +53,20 @@ docker compose up -d
 
 Requires NVIDIA Container Toolkit for GPU rendering.
 
+### Docker (CPU-only, no GPU)
+
+```bash
+docker compose up parapilot-cpu -d
+```
+
+Uses OSMesa software rendering — works on any machine without a GPU.
+
+## Examples
+
+See [`examples/`](examples/) for complete workflow pipelines:
+
+- **thermal_analysis.json** — Conjugate heat transfer post-processing (8 steps)
+
 ## Tools (18)
 
 | Tool | Description |
