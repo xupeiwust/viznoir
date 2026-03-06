@@ -33,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Test count: 310 → 1048 (99% coverage)
+- Test count: 310 → 1062 (99% coverage)
 - File format support: 26 → 50+ (via meshio fallback)
 - CI matrix: Python 3.10/3.12 → 3.10/3.11/3.12/3.13
 
@@ -61,10 +61,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `.pre-commit-config.yaml`: ruff, mypy, gitleaks, trailing-whitespace
 - `CODEOWNERS`: @kimimgo as default reviewer
 - Contributor recognition tiers in CONTRIBUTING.md
-- MCP protocol compliance test suite (15 tests)
+- MCP protocol compliance test suite (14 tests)
 - Performance benchmark framework (`benchmarks/bench_render.py`)
 - Social preview image (1280×640) for GitHub
 - Launch posts: HN, Reddit (3 subs), Twitter, LinkedIn, Discord drafts
+- Aerodynamics and structural FEA workflow examples
+- sdist excludes non-source files (251MB → 192KB package size)
+- Dependabot: github-actions ecosystem for automatic action version updates
 
 ## [0.1.0] - 2026-03-04
 

@@ -36,8 +36,9 @@ def _get_tool_fn(name: str):
 
 @pytest.fixture(autouse=True)
 def _unset_data_dir(monkeypatch):
-    """Ensure no data dir restriction for tests."""
+    """Ensure no data dir restriction and bypass file existence check for tests."""
     monkeypatch.delenv("PARAPILOT_DATA_DIR", raising=False)
+    monkeypatch.setattr("parapilot.server._validate_file_path", lambda fp: str(fp))
 
 
 # ---------------------------------------------------------------------------

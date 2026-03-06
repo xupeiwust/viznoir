@@ -179,7 +179,7 @@ We welcome contributions! Check out our [open issues](https://github.com/kimimgo
 git clone https://github.com/kimimgo/parapilot
 cd parapilot
 pip install -e ".[dev]"
-pytest                     # 1048 tests
+pytest                     # 1062 tests
 ruff check src/ tests/     # lint
 mypy src/parapilot/        # type check
 ```
@@ -191,7 +191,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed setup, architecture guide, a
 | | parapilot | LLNL/paraview_mcp | Kitware/vtk-mcp |
 |---|---|---|---|
 | Rendering | Headless VTK + ParaView | GUI-attached only | None (docs search) |
-| Tests | 1048 | 0 | 0 |
+| Tests | 1062 | 0 | 0 |
 | Docker | GPU (EGL) | No | No |
 | MCP Tools | 18 | 23 | 3 |
 | Plugin | Claude Code plugin | No | No |

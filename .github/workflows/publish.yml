@@ -8,10 +8,9 @@ permissions:
   id-token: write
 
 jobs:
-  publish:
+  verify:
+    name: Build & Verify
     runs-on: ubuntu-latest
-    environment: pypi
-
     steps:
       - uses: actions/checkout@v4
 
@@ -23,6 +22,37 @@ jobs:
         run: |
           pip install build
           python -m build
+
+      - name: Verify sdist size (must be < 1MB)
+        run: |
+          SIZE=$(stat -f%z dist/*.tar.gz 2>/dev/null || stat -c%s dist/*.tar.gz)
+          echo "sdist size: ${SIZE} bytes"
+          if [ "$SIZE" -gt 1048576 ]; then
+            echo "::error::sdist is ${SIZE} bytes (> 1MB). Check hatch exclude patterns."
+            exit 1
+          fi
+
+      - name: Verify wheel installs and imports
+        run: |
+          pip install dist/*.whl
+          python -c "from parapilot.server import mcp; print(f'Server: {mcp.name}')"
+          python -c "from parapilot.config import PVConfig; print('Config OK')"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+    needs: verify
+    environment: pypi
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1

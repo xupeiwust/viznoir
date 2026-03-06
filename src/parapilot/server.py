@@ -72,7 +72,9 @@ def _validate_file_path(file_path: str) -> str:
             close = difflib.get_close_matches(resolved.name, siblings, n=3)
             if close:
                 hint = f" Did you mean: {', '.join(close)}?"
-        logger.warning("File not found: '%s'.%s", file_path, hint)
+        raise FileNotFoundError(
+            f"File not found: '{file_path}'. Check that the path exists and is readable.{hint}"
+        )
     return str(resolved)
 
 
@@ -946,10 +948,16 @@ def main() -> None:
     """
     import argparse
     import asyncio
+    from importlib.metadata import version
 
     from parapilot.core.runner import VTKRunner
 
     parser = argparse.ArgumentParser(description="parapilot MCP Server")
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"mcp-server-parapilot {version('mcp-server-parapilot')}",
+    )
     parser.add_argument(
         "--transport",
         choices=["stdio", "sse", "streamable-http"],

@@ -317,20 +317,20 @@ try:
     if not _HAVE_BENCHMARK:
         # Minimal stand-in: calls the callable once and returns the result.
         @pytest.fixture
-        def benchmark():
+        def benchmark() -> Callable[..., object]:  # type: ignore[misc]
             """Fallback benchmark fixture when pytest-benchmark is not installed."""
 
-            def _bench(fn, *args, **kwargs):
+            def _bench(fn: Callable[..., object], *args: object, **kwargs: object) -> object:
                 return fn(*args, **kwargs)
 
             return _bench
 
     @pytest.fixture(scope="module")
-    def wavelet_data():
+    def wavelet_data() -> object:
         """Module-scoped wavelet fixture for benchmark tests."""
         return _make_wavelet()
 
-    def test_bench_wavelet_render(benchmark, wavelet_data):
+    def test_bench_wavelet_render(benchmark: Callable[..., object], wavelet_data: object) -> None:
         """Render the Wavelet dataset at 720p.
 
         With pytest-benchmark installed: measures mean/min/max latency over
@@ -340,9 +340,9 @@ try:
 
         renderer = VTKRenderer(RenderConfig(width=1280, height=720, array_name="RTData"))
         result = benchmark(renderer.render, wavelet_data)
-        assert result[:4] == b"\x89PNG"
+        assert isinstance(result, bytes) and result[:4] == b"\x89PNG"
 
-    def test_bench_wavelet_slice(benchmark, wavelet_data):
+    def test_bench_wavelet_slice(benchmark: Callable[..., object], wavelet_data: object) -> None:
         """Slice filter + render at 640x480.
 
         Measures ``slice_plane()`` + ``VTKRenderer.render()`` combined latency.
@@ -352,14 +352,14 @@ try:
 
         renderer = VTKRenderer(RenderConfig(width=640, height=480))
 
-        def _run():
+        def _run() -> bytes:
             sliced = slice_plane(wavelet_data, normal=(0.0, 0.0, 1.0))
             return renderer.render(sliced)
 
         result = benchmark(_run)
-        assert result[:4] == b"\x89PNG"
+        assert isinstance(result, bytes) and result[:4] == b"\x89PNG"
 
-    def test_bench_wavelet_contour(benchmark, wavelet_data):
+    def test_bench_wavelet_contour(benchmark: Callable[..., object], wavelet_data: object) -> None:
         """Contour isosurface + render at 640x480.
 
         Extracts two isosurfaces (120, 200) from ``RTData`` then renders.
@@ -369,25 +369,34 @@ try:
 
         renderer = VTKRenderer(RenderConfig(width=640, height=480, array_name="RTData"))
 
-        def _run():
+        def _run() -> bytes:
             iso = contour(wavelet_data, array_name="RTData", values=[120.0, 200.0])
             return renderer.render(iso)
 
         result = benchmark(_run)
-        assert result[:4] == b"\x89PNG"
+        assert isinstance(result, bytes) and result[:4] == b"\x89PNG"
 
     @pytest.mark.parametrize("label,wh", list(_RESOLUTIONS.items()))
-    def test_bench_resolution_scaling(benchmark, label, wh, wavelet_data):
+    def test_bench_resolution_scaling(
+        benchmark: Callable[..., object],
+        label: str,
+        wh: tuple[int, int],
+        wavelet_data: object,
+    ) -> None:
         """Render wavelet at each output resolution (480p / 720p / 1080p / 4K)."""
         from parapilot.engine.renderer import RenderConfig, VTKRenderer
 
         w, h = wh
         renderer = VTKRenderer(RenderConfig(width=w, height=h, array_name="RTData"))
         result = benchmark(renderer.render, wavelet_data)
-        assert result[:4] == b"\x89PNG"
+        assert isinstance(result, bytes) and result[:4] == b"\x89PNG"
 
     @pytest.mark.parametrize("cmap", _COLORMAPS)
-    def test_bench_colormap_switch(benchmark, cmap, wavelet_data):
+    def test_bench_colormap_switch(
+        benchmark: Callable[..., object],
+        cmap: str,
+        wavelet_data: object,
+    ) -> None:
         """Render wavelet with each of the six built-in colormaps at 720p."""
         from parapilot.engine.renderer import RenderConfig, VTKRenderer
 
@@ -395,7 +404,7 @@ try:
             RenderConfig(width=1280, height=720, colormap=cmap, array_name="RTData")
         )
         result = benchmark(renderer.render, wavelet_data)
-        assert result[:4] == b"\x89PNG"
+        assert isinstance(result, bytes) and result[:4] == b"\x89PNG"
 
 except ImportError:
     # pytest not installed — skip test function definitions silently.
