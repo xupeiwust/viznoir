@@ -515,21 +515,21 @@ def export_gltf(
         msg = "vtkGLTFExporter not available. Requires VTK >= 9.4"
         raise RuntimeError(msg)
 
-    from .renderer import _get_render_window
-
-    # Create minimal offscreen scene
-    rw = _get_render_window(800, 600)
-    rw.GetRenderers().RemoveAllItems()
+    # Create a standalone offscreen render window (avoid shared singleton
+    # which can SIGSEGV in headless CI environments without GPU/EGL).
+    rw = vtk.vtkRenderWindow()
+    rw.SetOffScreenRendering(True)
+    rw.SetSize(800, 600)
     renderer = vtk.vtkRenderer()
     rw.AddRenderer(renderer)
 
     mapper = vtk.vtkDataSetMapper()
     mapper.SetInputData(dataset)
+    mapper.SetScalarVisibility(False)
     actor = vtk.vtkActor()
     actor.SetMapper(mapper)
     renderer.AddActor(actor)
     renderer.ResetCamera()
-    rw.Render()
 
     exporter = vtk.vtkGLTFExporter()
     exporter.SetRenderWindow(rw)
