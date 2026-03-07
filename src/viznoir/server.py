@@ -735,6 +735,58 @@ async def cinematic_render(
 
 
 @mcp.tool()
+async def volume_render(
+    file_path: str,
+    field_name: str | None = None,
+    transfer_preset: str = "generic",
+    colormap: str = "viridis",
+    quality: str = "standard",
+    lighting: str | None = "cinematic",
+    background: str | None = "dark_gradient",
+    width: int | None = None,
+    height: int | None = None,
+    scalar_range: list[float] | None = None,
+    timestep: float | str | None = None,
+    output_filename: str = "volume.png",
+) -> Image:
+    """Volume render 3D data (CT, MRI, CFD fields) with transfer function presets.
+
+    Presets: generic, ct_bone, ct_tissue, mri_brain, thermal, isosurface_like
+
+    Args:
+        file_path: Path to volumetric data (VTI, VTK structured grid, etc.)
+        field_name: Scalar field to render, None for active scalars
+        transfer_preset: Opacity preset (ct_bone, ct_tissue, mri_brain, thermal, generic, isosurface_like)
+        colormap: Color map preset
+        quality: Render quality (draft/standard/cinematic/ultra/publication)
+        lighting: Lighting preset
+        background: Background preset
+        width: Image width in pixels
+        height: Image height in pixels
+        scalar_range: [min, max] for color scale
+        timestep: Specific timestep, "latest", or None
+        output_filename: Output filename
+    """
+    file_path = _validate_file_path(file_path)
+    logger.debug("tool.volume_render: file=%s preset=%s", file_path, transfer_preset)
+    t0 = time.monotonic()
+    from viznoir.tools.volume import volume_render_impl
+
+    png_bytes = await volume_render_impl(
+        file_path, _runner,
+        field_name=field_name, transfer_preset=transfer_preset,
+        colormap=colormap, quality=quality, lighting=lighting,
+        background=background, width=width, height=height,
+        scalar_range=scalar_range, timestep=timestep,
+        output_filename=output_filename,
+    )
+    logger.debug("tool.volume_render: done in %.2fs", time.monotonic() - t0)
+    if png_bytes:
+        return Image(data=png_bytes, format="png")
+    raise RuntimeError("Volume rendering failed: no image produced")
+
+
+@mcp.tool()
 async def compare(
     file_a: str,
     file_b: str,
@@ -903,6 +955,101 @@ async def preview_3d(
         output_filename=output_filename,
     )
     logger.debug("tool.preview_3d: done in %.2fs", time.monotonic() - t0)
+    return result
+
+
+# ---------------------------------------------------------------------------
+# analyze_data — VTK data insight extraction
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool()
+async def analyze_data(
+    file_path: str,
+    focus: str | None = None,
+    domain: str | None = None,
+) -> dict[str, Any]:
+    """Analyze VTK/simulation data and extract physics-aware insights.
+
+    Returns a Level 2 report with:
+    - Field statistics (min/max/mean/std)
+    - Physics context (what the numbers mean)
+    - Anomaly locations (where to look)
+    - Recommended views (slice/contour parameters ready for tool calls)
+    - Suggested equations (relevant governing equations)
+
+    Use this as the first step in a storytelling workflow:
+    1. analyze_data → get insights
+    2. Plan story from insights (use story_planning prompt)
+    3. Execute recommended_views with render/slice/contour tools
+    4. compose_assets → final output
+
+    Args:
+        file_path: Path to VTK/OpenFOAM/CGNS file
+        focus: Analyze only this field (None for all fields)
+        domain: Physics domain hint — "cfd", "fea", "thermal" (None for auto-detect)
+    """
+    file_path = _validate_file_path(file_path)
+    logger.debug("tool.analyze_data: start file=%s focus=%s domain=%s", file_path, focus, domain)
+    t0 = time.monotonic()
+    from viznoir.tools.analyze import analyze_data_impl
+
+    result = await analyze_data_impl(file_path, _runner, focus=focus, domain=domain)
+    logger.debug("tool.analyze_data: done in %.2fs", time.monotonic() - t0)
+    return result
+
+
+@mcp.tool()
+async def compose_assets(
+    assets: list[dict[str, Any]],
+    layout: Literal["story", "grid", "slides", "video"] = "story",
+    title: str | None = None,
+    width: int = 1920,
+    height: int = 1080,
+    scenes: list[dict[str, Any]] | None = None,
+    fps: int = 30,
+) -> dict[str, Any] | Image:
+    """Compose multiple assets into a deliverable format.
+
+    Layout modes:
+      - story: horizontal row of panels with title and labels (→ PNG)
+      - grid: N×M grid layout (→ PNG)
+      - slides: one slide per asset with centered image and label (→ PNG per slide)
+      - video: animated sequence with transitions (→ MP4)
+
+    Asset types (each item in the assets list):
+      - render: {"type": "render", "path": "/path/to/render.png", "label": "..."}
+      - latex:  {"type": "latex", "tex": "E = mc^2", "color": "FFFFFF", "label": "..."}
+      - plot:   {"type": "plot", "path": "/path/to/plot.png", "label": "..."}
+      - text:   {"type": "text", "content": "Plain text overlay", "label": "..."}
+
+    Transitions (for video layout scenes):
+      fade_in, fade_out, dissolve, wipe_left, wipe_right, wipe_down, wipe_up
+
+    Args:
+        assets: List of asset definitions (dicts with 'type' and type-specific keys)
+        layout: Layout mode — "story", "grid", "slides", or "video"
+        title: Optional title text (used in story layout)
+        width: Output width in pixels (default 1920)
+        height: Output height in pixels (default 1080)
+        scenes: Scene definitions for video layout (list of dicts with
+                asset_indices, duration, transition)
+        fps: Frames per second for video export (default 30)
+    """
+    logger.debug("tool.compose_assets: layout=%s assets=%d", layout, len(assets))
+    t0 = time.monotonic()
+    from viznoir.tools.compose import compose_assets_impl
+
+    result = await compose_assets_impl(
+        assets,
+        layout=layout,
+        title=title,
+        width=width,
+        height=height,
+        scenes=scenes,
+        fps=fps,
+    )
+    logger.debug("tool.compose_assets: done in %.2fs", time.monotonic() - t0)
     return result
 
 
