@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock
 
-from parapilot.prompts.guides import register_prompts
+from parapilot.prompts import guides as _guides_mod
 
 
 class TestPromptRegistration:
@@ -12,7 +12,8 @@ class TestPromptRegistration:
         mcp = MagicMock()
         # Make @mcp.prompt() return the function unchanged
         mcp.prompt.return_value = lambda fn: fn
-        register_prompts(mcp)
+        _guides_mod._registered_instances.discard(id(mcp))
+        _guides_mod.register_prompts(mcp)
         assert mcp.prompt.call_count == 3  # cfd, fea, visualization
 
 
@@ -28,7 +29,8 @@ class TestCFDGuide:
             return wrapper
 
         mcp.prompt = prompt_decorator
-        register_prompts(mcp)
+        _guides_mod._registered_instances.discard(id(mcp))
+        _guides_mod.register_prompts(mcp)
         return captured.get("cfd_postprocess")
 
     def test_general(self):
@@ -75,7 +77,8 @@ class TestFEAGuide:
             return wrapper
 
         mcp.prompt = prompt_decorator
-        register_prompts(mcp)
+        _guides_mod._registered_instances.discard(id(mcp))
+        _guides_mod.register_prompts(mcp)
         return captured.get("fea_postprocess")
 
     def test_static(self):
@@ -106,7 +109,8 @@ class TestVisualizationGuide:
             return wrapper
 
         mcp.prompt = prompt_decorator
-        register_prompts(mcp)
+        _guides_mod._registered_instances.discard(id(mcp))
+        _guides_mod.register_prompts(mcp)
         return captured.get("visualization_guide")
 
     def test_returns_guide(self):

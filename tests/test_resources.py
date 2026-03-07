@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from unittest.mock import MagicMock
 
-from parapilot.resources.catalog import register_resources
+from parapilot.resources import catalog as _catalog_mod
 
 
 def _capture_resources():
@@ -20,7 +20,9 @@ def _capture_resources():
         return wrapper
 
     mcp.resource = resource_decorator
-    register_resources(mcp)
+    # Reset idempotency guard — id() can be reused after GC of previous mocks
+    _catalog_mod._registered_instances.discard(id(mcp))
+    _catalog_mod.register_resources(mcp)
     return captured
 
 
