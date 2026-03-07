@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 # viznoir
 
-CAE post-processing MCP server for AI coding assistants.
+VTK is all you need. Cinema-quality science visualization for AI agents.
 
 ## Project Info
 - **Repo**: kimimgo/viznoir
@@ -19,7 +19,7 @@ CAE post-processing MCP server for AI coding assistants.
 # Install (editable with dev deps)
 pip install -e ".[dev]"
 
-# Run all tests (650 tests, async mode=auto)
+# Run all tests (1134 tests, async mode=auto)
 pytest --cov=viznoir --cov-report=term-missing -q
 
 # Run a single test file
@@ -134,7 +134,7 @@ server.py (MCP tool)
 | Tools | 18 |
 | Resources | 11 |
 | Prompts | 3 |
-| Tests | 1128 |
+| Tests | 1134 |
 
 ## Test Structure
 
