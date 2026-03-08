@@ -88,14 +88,14 @@ All renders from single MCP tool calls — no post-processing.
 | File Formats | 50+ (meshio) | 70+ | 30+ | ~20 |
 | Installation | pip install | System package | pip install | pip install |
 | Science Storytelling | LaTeX + timeline + video | — | — | — |
-| Tests | 1300+ (99% cov) | N/A | Yes | N/A |
+| Tests | 1315+ (97% cov) | N/A | Yes | N/A |
 
 ## Contributing
 
 ```bash
 git clone https://github.com/kimimgo/viznoir
 cd viznoir && pip install -e ".[dev]"
-pytest  # 1300+ tests, 99% coverage
+pytest  # 1315+ tests
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for details.

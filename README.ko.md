@@ -88,14 +88,14 @@ NVIDIA Container Toolkit 필요. CPU 전용: `docker compose up viznoir-cpu -d`
 | 파일 포맷 | 50+ (meshio) | 70+ | 30+ | ~20 |
 | 설치 | pip install | 시스템 패키지 | pip install | pip install |
 | 과학 스토리텔링 | LaTeX + 타임라인 + 비디오 | — | — | — |
-| 테스트 | 1300+ (99% 커버리지) | N/A | 있음 | N/A |
+| 테스트 | 1315+ (97% 커버리지) | N/A | 있음 | N/A |
 
 ## 기여하기
 
 ```bash
 git clone https://github.com/kimimgo/viznoir
 cd viznoir && pip install -e ".[dev]"
-pytest  # 1300+ 테스트, 99% 커버리지
+pytest  # 1315+ 테스트
 ```
 
 자세한 내용은 [CONTRIBUTING.md](CONTRIBUTING.md)를 참조하세요.

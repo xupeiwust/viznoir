@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-03-08
+
+### Added
+
+- **Science Storyteller Pipeline**: analyze → render → compose end-to-end workflow
+- `analyze_data` MCP tool: VTK dataset insight extraction (field statistics, anomaly detection, physics context, cross-field analysis, governing equation suggestion)
+- `compose_assets` MCP tool: multi-asset composition with 4 layout modes (story, grid, slides, video)
+- `engine/analysis.py`: field classification, exact field mapping (OpenFOAM convention), correlation analysis, fitted equations
+- `anim/latex.py`: LaTeX → SVG → PNG rendering with body:color:preamble cache (cold 217ms, warm 10ms)
+- `anim/compositor.py`: story/grid/slides layout rendering + ffmpeg video export (RGBA → libx264 yuv420p)
+- `anim/timeline.py`: scene sequencing with prefix-sum + bisect O(log n) lookup
+- `anim/transitions.py`: fade_in, fade_out, dissolve, wipe transitions (Image.blend C-level)
+- `anim/easing.py`: 17 easing functions (linear, ease_in/out_quad/cubic/sine/expo/circ/back/elastic/bounce)
+- GitHub Pages deployment workflow (Astro landing page)
+- Branch protection: force push/delete blocked, required status checks
+
+### Changed
+
+- Test count: 1134 → 1315+ (97% coverage local, ~82% CI)
+- MCP tools: 18 → 21
+- CI test count guard: 1120 → 1290
+
+### Fixed
+
+- PIL.Image type hint: `from PIL.Image import Image` in TYPE_CHECKING (module vs class)
+- np.linalg.norm mypy: explicit `result: np.ndarray` annotation for Any return
+- LaTeX SVG cache test: conditional on `LATEX_AVAILABLE` for CI without LaTeX
+
 ## [0.3.0] - 2026-03-07
 
 ### Changed
@@ -125,7 +153,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Path traversal prevention when `VIZNOIR_DATA_DIR` is set
 - Landing page (Astro 5 + Tailwind) with interactive showcase gallery
 
-[Unreleased]: https://github.com/kimimgo/viznoir/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/kimimgo/viznoir/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/kimimgo/viznoir/compare/v0.3.0...v0.5.0
 [0.3.0]: https://github.com/kimimgo/viznoir/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/kimimgo/viznoir/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/kimimgo/viznoir/releases/tag/v0.1.0
