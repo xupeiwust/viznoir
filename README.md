@@ -10,7 +10,9 @@
 [![Python](https://img.shields.io/pypi/pyversions/mcp-server-viznoir)](https://pypi.org/project/mcp-server-viznoir/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/kimimgo/viznoir/blob/main/LICENSE)
 
-![DrivAerML Automotive CFD](https://raw.githubusercontent.com/kimimgo/viznoir/main/www/public/showcase/drivaerml_cp.webp)
+![Science Storytelling: Physics Decomposition](https://raw.githubusercontent.com/kimimgo/viznoir/main/www/public/showcase/cavity_story.webp)
+
+*One pipeline: `inspect_physics` → insight extraction → `cinematic_render` × 4 → LaTeX equations → `compose_assets` story*
 
 ## Quick Start
 
@@ -64,6 +66,20 @@ Requires NVIDIA Container Toolkit. For CPU-only: `docker compose up viznoir-cpu 
 - **50+ Formats** — OpenFOAM, VTK, CGNS, STL, PLY, OBJ, Exodus, Ensight
   via VTK readers + meshio.
 
+## Science Storytelling
+
+Not just rendering — viznoir extracts physics insights and composes them into stories.
+
+```
+"Analyze the cavity flow and show me what's happening"
+
+→ inspect_physics: 20 stagnation points, ω range [-15.2, +19.6]/s
+→ cinematic_render × 4: velocity, pressure, vorticity, temperature
+→ compose_assets: LaTeX equations + insight labels + story layout
+```
+
+![Multi-Physics Grid](https://raw.githubusercontent.com/kimimgo/viznoir/main/www/public/showcase/cavity_grid.webp)
+
 ## See It In Action
 
 All renders from single MCP tool calls — no post-processing.
@@ -72,10 +88,8 @@ All renders from single MCP tool calls — no post-processing.
 |---|---|---|
 | ![Automotive CFD](https://raw.githubusercontent.com/kimimgo/viznoir/main/www/public/showcase/drivaerml_cp.webp) | ![Medical CT](https://raw.githubusercontent.com/kimimgo/viznoir/main/www/public/showcase/ct_head_contour.webp) | ![Blood Flow](https://raw.githubusercontent.com/kimimgo/viznoir/main/www/public/showcase/streamlines.webp) |
 | Automotive CFD | Medical CT | Blood flow |
-| ![Volumetric](https://raw.githubusercontent.com/kimimgo/viznoir/main/www/public/showcase/wavelet-cinematic.webp) | ![Cavity CFD](https://raw.githubusercontent.com/kimimgo/viznoir/main/www/public/showcase/cavity-streamlines.webp) | ![Structural FEA](https://raw.githubusercontent.com/kimimgo/viznoir/main/www/public/showcase/beam-stress.webp) |
-| Volumetric data | Cavity flow CFD | Structural FEA |
-| ![HVAC](https://raw.githubusercontent.com/kimimgo/viznoir/main/www/public/showcase/office_flow.webp) | ![Thermal](https://raw.githubusercontent.com/kimimgo/viznoir/main/www/public/showcase/sphere-temperature.webp) | ![Stanford Dragon](https://raw.githubusercontent.com/kimimgo/viznoir/main/www/public/showcase/dragon.webp) |
-| HVAC airflow | Thermal analysis | Stanford Dragon |
+| ![HVAC](https://raw.githubusercontent.com/kimimgo/viznoir/main/www/public/showcase/office_flow.webp) | ![Structural FEA](https://raw.githubusercontent.com/kimimgo/viznoir/main/www/public/showcase/arch_structural.webp) | ![Stanford Dragon](https://raw.githubusercontent.com/kimimgo/viznoir/main/www/public/showcase/dragon.webp) |
+| HVAC airflow | Structural FEA | Stanford Dragon |
 
 [Full Gallery →](https://kimimgo.github.io/viznoir)
 

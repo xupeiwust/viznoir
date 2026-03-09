@@ -10,7 +10,9 @@
 [![Python](https://img.shields.io/pypi/pyversions/mcp-server-viznoir)](https://pypi.org/project/mcp-server-viznoir/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/kimimgo/viznoir/blob/main/LICENSE)
 
-![DrivAerML 자동차 CFD](https://raw.githubusercontent.com/kimimgo/viznoir/main/www/public/showcase/drivaerml_cp.webp)
+![과학 스토리텔링: 물리 분해](https://raw.githubusercontent.com/kimimgo/viznoir/main/www/public/showcase/cavity_story.webp)
+
+*하나의 파이프라인: `inspect_physics` → 인사이트 추출 → `cinematic_render` × 4 → LaTeX 수식 → `compose_assets` 스토리*
 
 ## 빠른 시작
 
@@ -64,6 +66,20 @@ NVIDIA Container Toolkit 필요. CPU 전용: `docker compose up viznoir-cpu -d`
 - **50+ 포맷** — OpenFOAM, VTK, CGNS, STL, PLY, OBJ, Exodus, Ensight
   등 VTK 리더 + meshio 지원.
 
+## 과학 스토리텔링
+
+단순 렌더링이 아닙니다 — viznoir는 물리 인사이트를 추출하고 스토리로 합성합니다.
+
+```
+"캐비티 유동 분석해서 뭐가 일어나는지 보여줘"
+
+→ inspect_physics: 정체점 20개, 와도 범위 [-15.2, +19.6]/s
+→ cinematic_render × 4: 속도, 압력, 와도, 온도
+→ compose_assets: LaTeX 수식 + 인사이트 라벨 + 스토리 레이아웃
+```
+
+![다중물리 그리드](https://raw.githubusercontent.com/kimimgo/viznoir/main/www/public/showcase/cavity_grid.webp)
+
 ## 렌더링 갤러리
 
 모든 렌더링은 MCP 도구 한 번 호출로 생성 — 후처리 없음.
@@ -72,10 +88,8 @@ NVIDIA Container Toolkit 필요. CPU 전용: `docker compose up viznoir-cpu -d`
 |---|---|---|
 | ![자동차 CFD](https://raw.githubusercontent.com/kimimgo/viznoir/main/www/public/showcase/drivaerml_cp.webp) | ![의료 CT](https://raw.githubusercontent.com/kimimgo/viznoir/main/www/public/showcase/ct_head_contour.webp) | ![혈류](https://raw.githubusercontent.com/kimimgo/viznoir/main/www/public/showcase/streamlines.webp) |
 | 자동차 CFD | 의료 CT | 혈류 시각화 |
-| ![볼류메트릭](https://raw.githubusercontent.com/kimimgo/viznoir/main/www/public/showcase/wavelet-cinematic.webp) | ![캐비티 CFD](https://raw.githubusercontent.com/kimimgo/viznoir/main/www/public/showcase/cavity-streamlines.webp) | ![구조 FEA](https://raw.githubusercontent.com/kimimgo/viznoir/main/www/public/showcase/beam-stress.webp) |
-| 볼류메트릭 데이터 | 캐비티 유동 CFD | 구조 FEA |
-| ![HVAC](https://raw.githubusercontent.com/kimimgo/viznoir/main/www/public/showcase/office_flow.webp) | ![열해석](https://raw.githubusercontent.com/kimimgo/viznoir/main/www/public/showcase/sphere-temperature.webp) | ![스탠포드 드래곤](https://raw.githubusercontent.com/kimimgo/viznoir/main/www/public/showcase/dragon.webp) |
-| HVAC 기류 | 열해석 | 스탠포드 드래곤 |
+| ![HVAC](https://raw.githubusercontent.com/kimimgo/viznoir/main/www/public/showcase/office_flow.webp) | ![구조 FEA](https://raw.githubusercontent.com/kimimgo/viznoir/main/www/public/showcase/arch_structural.webp) | ![스탠포드 드래곤](https://raw.githubusercontent.com/kimimgo/viznoir/main/www/public/showcase/dragon.webp) |
+| HVAC 기류 | 구조 FEA | 스탠포드 드래곤 |
 
 [전체 갤러리 →](https://kimimgo.github.io/viznoir)
 

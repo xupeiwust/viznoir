@@ -16,29 +16,14 @@ const images = [
     label: 'Blood Flow',
   },
   {
-    src: '/viznoir/showcase/wavelet-cinematic.webp',
-    alt: 'Wavelet volumetric field cinematic render',
-    label: 'Volumetric Data',
-  },
-  {
-    src: '/viznoir/showcase/cavity-streamlines.webp',
-    alt: 'Lid-driven cavity flow streamlines',
-    label: 'CFD Cavity Flow',
-  },
-  {
-    src: '/viznoir/showcase/beam-stress.webp',
-    alt: 'Cantilever beam von Mises stress cinematic',
-    label: 'Structural FEA',
-  },
-  {
     src: '/viznoir/showcase/office_flow.webp',
     alt: 'Office HVAC airflow streamlines',
     label: 'HVAC Flow',
   },
   {
-    src: '/viznoir/showcase/sphere-temperature.webp',
-    alt: 'Sphere multi-physics temperature field',
-    label: 'Thermal Analysis',
+    src: '/viznoir/showcase/arch_structural.webp',
+    alt: 'Structural FEA displacement analysis',
+    label: 'Structural FEA',
   },
   {
     src: '/viznoir/showcase/dragon.webp',
@@ -52,16 +37,38 @@ const images = [
   <div class="section-divider mb-24"></div>
   <div class="max-w-6xl mx-auto px-6">
 
-    <div class="text-center mb-12 fade-up">
+    <!-- Science Storytelling Hero -->
+    <div class="text-center mb-16 fade-up">
       <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-3">
-        <span class="gradient-text-white">See It In Action</span>
+        <span class="gradient-text-white">Science Storytelling</span>
       </h2>
-      <p class="text-text-secondary max-w-lg mx-auto">
-        All renders from single MCP tool calls — no post-processing.
+      <p class="text-text-secondary max-w-2xl mx-auto mb-8">
+        Not just rendering &mdash; viznoir extracts physics insights, renders LaTeX equations,
+        and composes cinematic story layouts. One pipeline, one command.
+      </p>
+      <div class="card-hover overflow-hidden group cursor-default">
+        <img
+          src="/viznoir/showcase/cavity_story.webp"
+          alt="Lid-driven cavity flow: physics decomposition with LaTeX equations and multi-field cinematic renders"
+          class="w-full rounded-lg transition-transform duration-500 group-hover:scale-[1.01]"
+          loading="lazy"
+        />
+      </div>
+      <p class="text-xs text-text-secondary mt-4 font-mono">
+        inspect_physics &rarr; cinematic_render &times; 4 &rarr; LaTeX equations &rarr; compose_assets
       </p>
     </div>
 
-    <!-- 2x3 responsive grid -->
+    <!-- Individual renders grid -->
+    <div class="text-center mb-12 fade-up">
+      <h3 class="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
+        <span class="gradient-text-white">See It In Action</span>
+      </h3>
+      <p class="text-text-secondary max-w-lg mx-auto">
+        All renders from single MCP tool calls &mdash; no post-processing.
+      </p>
+    </div>
+
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 fade-up">
       {images.map((img) => (
         <div class="card-hover overflow-hidden group cursor-default">
