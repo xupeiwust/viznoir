@@ -59,8 +59,8 @@ CI runs on Python 3.10, 3.11, 3.12, 3.13: lint → type check → test. Coverage
 ## Architecture
 
 ```
-Layer 3: Skills (자연어 인터페이스)        ← .claude-plugin/
-  cfd-postprocess, mesh-inspect, report-generate
+Layer 3: Skills (자연어 인터페이스)        ← .claude-plugin/skills/
+  cae-postprocess (도메인 전문가 통역 — CFD/FEA/SPH)
 
 Layer 2: Agents (전문 서브에이전트)        ← agents/
   viz-agent (sonnet), mesh-agent (haiku)
