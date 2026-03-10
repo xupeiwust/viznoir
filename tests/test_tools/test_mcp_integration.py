@@ -23,23 +23,39 @@ from viznoir.server import mcp
 class TestMCPToolListing:
     """Verify all tools are discoverable via MCP protocol."""
 
-    async def test_list_tools_returns_21(self):
+    async def test_list_tools_returns_22(self):
         from fastmcp import Client
 
         async with Client(mcp) as client:
             tools = await client.list_tools()
-            assert len(tools) == 21
+            assert len(tools) == 22
 
     async def test_all_tool_names_present(self):
         from fastmcp import Client
 
         expected_names = {
-            "inspect_data", "render", "slice", "contour", "clip",
-            "streamlines", "cinematic_render", "compare",
-            "probe_timeseries", "batch_render", "preview_3d",
-            "extract_stats", "plot_over_line", "integrate_surface",
-            "animate", "split_animate", "execute_pipeline", "pv_isosurface",
-            "volume_render", "analyze_data", "compose_assets",
+            "inspect_data",
+            "render",
+            "slice",
+            "contour",
+            "clip",
+            "streamlines",
+            "cinematic_render",
+            "compare",
+            "probe_timeseries",
+            "batch_render",
+            "preview_3d",
+            "extract_stats",
+            "plot_over_line",
+            "integrate_surface",
+            "animate",
+            "split_animate",
+            "execute_pipeline",
+            "pv_isosurface",
+            "volume_render",
+            "analyze_data",
+            "compose_assets",
+            "inspect_physics",
         }
         async with Client(mcp) as client:
             tools = await client.list_tools()
@@ -224,6 +240,7 @@ class TestMCPTasksSupport:
                 assert "execute_pipeline" in names
 
         import asyncio
+
         asyncio.run(_check())
 
     def test_has_mcp_tasks_with_mock_old_version(self):
@@ -251,8 +268,9 @@ class TestMCPTasksSupport:
                 return fake_docket
             return orig_import(name, *args, **kwargs)
 
-        with patch("importlib.metadata.version", return_value="3.1.0"), patch(
-            "importlib.import_module", side_effect=_import_with_docket
+        with (
+            patch("importlib.metadata.version", return_value="3.1.0"),
+            patch("importlib.import_module", side_effect=_import_with_docket),
         ):
             result = _has_mcp_tasks()
             assert result is True
