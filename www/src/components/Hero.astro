@@ -18,10 +18,10 @@ import CodeBlock from './CodeBlock.astro';
         </h1>
 
         <p class="text-xl sm:text-2xl text-text-primary font-medium mb-2 leading-snug">
-          Post-process simulations from your terminal.
+          VTK is all you need.
         </p>
         <p class="text-lg text-text-secondary/60 mb-8">
-          No ParaView. No GUI.
+          Cinema-quality science visualization for AI agents.
         </p>
 
         <!-- Install CTA -->
@@ -36,12 +36,16 @@ import CodeBlock from './CodeBlock.astro';
             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
             GitHub
           </a>
+          <a href="https://pypi.org/project/mcp-server-viznoir/" target="_blank" rel="noopener noreferrer"
+             class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-secondary/80 text-sm text-text-secondary hover:text-accent hover:border-accent/30 transition-all">
+            PyPI
+          </a>
         </div>
 
         <!-- Supported clients -->
         <div class="flex items-center gap-2 flex-wrap">
           <span class="text-xs text-text-secondary/40 font-mono">Works with</span>
-          {['Claude Code', 'Cursor', 'Gemini CLI', 'any MCP client'].map((client) => (
+          {['Claude Code', 'Cursor', 'Windsurf', 'Gemini CLI', 'any MCP client'].map((client) => (
             <span class="px-2.5 py-1 rounded-full bg-secondary/80 border border-border text-xs font-mono text-text-secondary/60">
               {client}
             </span>
@@ -49,56 +53,25 @@ import CodeBlock from './CodeBlock.astro';
         </div>
       </div>
 
-      <!-- Right column: demo (40%) -->
+      <!-- Right column: showcase grid (40%) -->
       <div class="lg:col-span-2">
-        <div class="rounded-2xl border border-border bg-secondary/80 backdrop-blur-sm overflow-hidden glow-accent">
-          <!-- Terminal chrome -->
-          <div class="flex items-center gap-2 px-4 py-2.5 border-b border-border">
-            <div class="flex gap-1.5">
-              <span class="w-2.5 h-2.5 rounded-full bg-[#ff5f57]/80"></span>
-              <span class="w-2.5 h-2.5 rounded-full bg-[#febc2e]/80"></span>
-              <span class="w-2.5 h-2.5 rounded-full bg-[#28c840]/80"></span>
-            </div>
-            <span class="text-[10px] text-text-secondary/50 font-mono ml-2">claude code</span>
+        <div class="grid grid-cols-2 gap-2 rounded-2xl overflow-hidden border border-border bg-secondary/80 p-2">
+          <div class="rounded-lg overflow-hidden">
+            <img src="/viznoir/showcase/01_skull_annotated.webp" alt="Medical CT volume rendering" class="w-full h-full object-cover" loading="eager" />
           </div>
-
-          <!-- Terminal body -->
-          <div class="relative font-mono text-xs p-4 bg-tertiary/80">
-            <div class="terminal-line mb-3" style="--delay: 0s">
-              <span class="text-text-secondary/40 text-[10px]">mcp &gt;</span>
-              <span class="text-accent ml-1.5">viznoir.render</span>
-              <span class="text-text-secondary/50">(</span>
-            </div>
-            <div class="terminal-line mb-0 pl-8" style="--delay: 0.3s">
-              <span class="text-text-secondary/50">file=</span><span class="text-[#a5d6ff]">"cavity.foam"</span><span class="text-text-secondary/30">,</span>
-            </div>
-            <div class="terminal-line mb-0 pl-8" style="--delay: 0.5s">
-              <span class="text-text-secondary/50">field=</span><span class="text-[#a5d6ff]">"p"</span><span class="text-text-secondary/30">,</span>
-            </div>
-            <div class="terminal-line mb-2 pl-8" style="--delay: 0.7s">
-              <span class="text-text-secondary/50">colormap=</span><span class="text-[#a5d6ff]">"jet"</span>
-              <span class="text-text-secondary/50">)</span>
-            </div>
-
-            <div class="terminal-line mb-2" style="--delay: 1.5s">
-              <span class="text-[#28c840]">&#10003;</span>
-              <span class="text-text-secondary ml-1.5">Rendered</span>
-              <span class="text-accent ml-1">pressure_p.png</span>
-            </div>
-
-            <!-- Render result image -->
-            <div class="terminal-line" style="--delay: 2.2s">
-              <div class="rounded-lg border border-border/50 overflow-hidden">
-                <img
-                  src="/viznoir/showcase/drivaerml_cp.webp"
-                  alt="DrivAerML automotive CFD pressure coefficient render"
-                  class="w-full h-auto object-cover opacity-90"
-                  loading="eager"
-                />
-              </div>
-            </div>
+          <div class="rounded-lg overflow-hidden">
+            <img src="/viznoir/showcase/05_drivaerml_annotated.webp" alt="Automotive CFD pressure" class="w-full h-full object-cover" loading="eager" />
+          </div>
+          <div class="rounded-lg overflow-hidden">
+            <img src="/viznoir/showcase/07_aneurism_annotated.webp" alt="Vascular MRA" class="w-full h-full object-cover" loading="eager" />
+          </div>
+          <div class="rounded-lg overflow-hidden">
+            <img src="/viznoir/showcase/08_bennu_annotated.webp" alt="Bennu asteroid" class="w-full h-full object-cover" loading="eager" />
           </div>
         </div>
+        <p class="text-[10px] text-text-secondary/30 font-mono text-center mt-2">
+          4 of 10 domains — all from single MCP tool calls
+        </p>
       </div>
 
     </div>
