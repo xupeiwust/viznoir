@@ -2,15 +2,14 @@
 
 from __future__ import annotations
 
-import math
 import os
 import tempfile
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from viznoir.anim.physics import FrameConfig, __all__ as physics_all
-
+from viznoir.anim.physics import FrameConfig
+from viznoir.anim.physics import __all__ as physics_all
 
 # ---------------------------------------------------------------------------
 # FrameConfig
@@ -304,7 +303,10 @@ class TestPhysicsDocstrings:
 
     @pytest.mark.parametrize(
         "name",
-        ["layer_reveal", "clip_sweep", "iso_sweep", "threshold_reveal", "warp_oscillation", "light_orbit", "streamline_growth"],
+        [
+            "layer_reveal", "clip_sweep", "iso_sweep", "threshold_reveal",
+            "warp_oscillation", "light_orbit", "streamline_growth",
+        ],
     )
     def test_has_physics_explanation(self, name):
         import viznoir.anim.physics as mod

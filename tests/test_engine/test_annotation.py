@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock, patch
 
-import numpy as np
 import pytest
 
 from viznoir.engine.annotation import (
@@ -16,7 +15,6 @@ from viznoir.engine.annotation import (
     add_label,
     clear_annotations,
 )
-
 
 # ---------------------------------------------------------------------------
 # ANNOTATION_COLORS
@@ -66,8 +64,6 @@ class TestAddCaption:
         _annotation_actors.pop(renderer_id, None)
 
     def test_default_border_is_false(self):
-        import vtk as _vtk
-
         renderer = MagicMock()
         renderer_id = id(renderer)
         _annotation_actors.pop(renderer_id, None)
@@ -79,8 +75,6 @@ class TestAddCaption:
         _annotation_actors.pop(renderer_id, None)
 
     def test_leader_enabled_by_default(self):
-        import vtk as _vtk
-
         renderer = MagicMock()
         renderer_id = id(renderer)
         _annotation_actors.pop(renderer_id, None)
