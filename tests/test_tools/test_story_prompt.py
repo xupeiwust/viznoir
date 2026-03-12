@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import json
 
+from viznoir.server import mcp
+
 
 class TestStoryPlanningPrompt:
     async def test_prompt_registered(self):
         from fastmcp import Client
-
-        from viznoir.server import mcp
 
         async with Client(mcp) as client:
             prompts = await client.list_prompts()
@@ -18,8 +18,6 @@ class TestStoryPlanningPrompt:
 
     async def test_prompt_returns_guide(self):
         from fastmcp import Client
-
-        from viznoir.server import mcp
 
         async with Client(mcp) as client:
             result = await client.get_prompt("story_planning", arguments={"domain": "cfd"})
@@ -30,8 +28,6 @@ class TestStoryPlanningPrompt:
     async def test_prompt_default_domain(self):
         from fastmcp import Client
 
-        from viznoir.server import mcp
-
         async with Client(mcp) as client:
             result = await client.get_prompt("story_planning")
             text = result.messages[0].content.text
@@ -39,8 +35,6 @@ class TestStoryPlanningPrompt:
 
     async def test_prompt_custom_domain(self):
         from fastmcp import Client
-
-        from viznoir.server import mcp
 
         async with Client(mcp) as client:
             result = await client.get_prompt("story_planning", arguments={"domain": "fea"})
@@ -51,8 +45,6 @@ class TestStoryPlanningPrompt:
     async def test_prompt_contains_narrative_structure(self):
         from fastmcp import Client
 
-        from viznoir.server import mcp
-
         async with Client(mcp) as client:
             result = await client.get_prompt("story_planning", arguments={"domain": "cfd"})
             text = result.messages[0].content.text
@@ -62,8 +54,6 @@ class TestStoryPlanningPrompt:
     async def test_prompt_contains_compose_assets_example(self):
         from fastmcp import Client
 
-        from viznoir.server import mcp
-
         async with Client(mcp) as client:
             result = await client.get_prompt("story_planning", arguments={"domain": "cfd"})
             text = result.messages[0].content.text
@@ -71,8 +61,6 @@ class TestStoryPlanningPrompt:
 
     async def test_prompt_has_description(self):
         from fastmcp import Client
-
-        from viznoir.server import mcp
 
         async with Client(mcp) as client:
             prompts = await client.list_prompts()
@@ -85,8 +73,6 @@ class TestStorytellingResource:
     async def test_resource_registered(self):
         from fastmcp import Client
 
-        from viznoir.server import mcp
-
         async with Client(mcp) as client:
             resources = await client.list_resources()
             uris = {str(r.uri) for r in resources}
@@ -94,8 +80,6 @@ class TestStorytellingResource:
 
     async def test_resource_contains_templates(self):
         from fastmcp import Client
-
-        from viznoir.server import mcp
 
         async with Client(mcp) as client:
             result = await client.read_resource("viznoir://storytelling")
@@ -106,8 +90,6 @@ class TestStorytellingResource:
 
     async def test_resource_scene_templates_valid(self):
         from fastmcp import Client
-
-        from viznoir.server import mcp
 
         async with Client(mcp) as client:
             result = await client.read_resource("viznoir://storytelling")
@@ -121,8 +103,6 @@ class TestStorytellingResource:
 
     async def test_resource_narrative_patterns_domains(self):
         from fastmcp import Client
-
-        from viznoir.server import mcp
 
         async with Client(mcp) as client:
             result = await client.read_resource("viznoir://storytelling")
@@ -139,8 +119,6 @@ class TestStorytellingResource:
 
     async def test_resource_annotation_styles(self):
         from fastmcp import Client
-
-        from viznoir.server import mcp
 
         async with Client(mcp) as client:
             result = await client.read_resource("viznoir://storytelling")
