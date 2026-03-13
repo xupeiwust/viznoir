@@ -1,6 +1,6 @@
 # viznoir
 
-[English](README.md) | **한국어**
+[English](README.md) | **한국어** | [中文](README.zh.md) | [日本語](README.ja.md) | [Deutsch](README.de.md) | [Français](README.fr.md) | [Español](README.es.md) | [Português](README.pt.md)
 
 > VTK is all you need. AI 에이전트를 위한 시네마 퀄리티 과학 시각화.
 
