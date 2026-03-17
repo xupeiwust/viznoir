@@ -1,0 +1,78 @@
+# viznoir
+
+> Cinema-quality science visualization for AI agents via MCP (Model Context Protocol).
+
+## About
+
+viznoir is an open-source MCP server that brings VTK-powered scientific visualization
+to AI coding assistants like Claude, ChatGPT, and Cursor. It provides 22 tools for
+headless rendering, slicing, contouring, volume rendering, and animating simulation
+data — no ParaView GUI needed. One prompt produces publication-quality renders.
+
+viznoir is the only MCP server purpose-built for engineering simulation post-processing.
+It supports CFD (OpenFOAM, CGNS), FEA (Abaqus, Nastran), SPH (DualSPHysics), medical
+imaging, molecular visualization, and planetary science data.
+
+## Quick Start
+
+```
+pip install mcp-server-viznoir
+```
+
+Add to Claude Desktop config:
+```json
+{ "mcpServers": { "viznoir": { "command": "mcp-server-viznoir" } } }
+```
+
+## Key Capabilities
+
+- 22 MCP tools for simulation post-processing
+- Cinematic rendering: 3-point lighting, SSAO, FXAA, PBR materials, auto-camera
+- 50+ input formats via VTK + meshio (VTK, VTU, VTP, CGNS, STL, OBJ, PLY, NetCDF, etc.)
+- Headless GPU rendering (EGL) — no display server required
+- Domain auto-detection: CFD, FEA, SPH, medical, molecular, generic
+- Adaptive resolution: analyze (480p), preview (720p), publish (1080p)
+- Agent Harness: autonomous inspect → plan → render → evaluate → refine loop
+- 1500+ tests, 97% code coverage, MIT license
+
+## Tools (22)
+
+- inspect_data: Explore file metadata (fields, timesteps, bounds)
+- render: Single-view visualization with colormaps
+- cinematic_render: Publication-quality rendering with lighting and materials
+- slice: Cut through 3D data with arbitrary planes
+- contour: Extract isosurfaces at specified values
+- clip: Remove portions of data with cutting planes
+- streamlines: Flow visualization for vector fields
+- compare: Side-by-side or diff comparison of two datasets
+- batch_render: Render multiple fields in one call
+- volume_render: Direct volume rendering with transfer functions
+- animate: Time series or orbit animation → GIF/MP4
+- split_animate: Multi-pane synchronized animation
+- extract_stats: Statistical summary of field data
+- plot_over_line: Sample data along a line → CSV/chart
+- integrate_surface: Surface integration (flux, area-averaged quantities)
+- probe_timeseries: Sample field at a point across timesteps
+- preview_3d: Export to glTF/glB for interactive 3D viewing
+- inspect_physics: Topology analysis + case context extraction
+- analyze_data: AI-guided data insight extraction
+- compose_assets: Multi-asset composition and layout
+- execute_pipeline: Full pipeline DSL for advanced operations
+- auto_postprocess: Autonomous post-processing orchestration
+
+## Supported Domains
+
+- CFD: OpenFOAM (.foam), Fluent (.cas/.msh), CGNS, Plot3D
+- FEA: Abaqus (.inp), Nastran (.bdf/.op2), CalculiX
+- SPH: DualSPHysics (.bi4), custom VTK particle data
+- Medical: DICOM, NIfTI, VTI volumes
+- Molecular: PDB protein structures, electron density maps
+- Geoscience: NetCDF, seismic/ocean/climate data
+- General: STL, OBJ, PLY, glTF for 3D geometry
+
+## Links
+
+- [Homepage](https://kimimgo.github.io/viznoir/)
+- [GitHub](https://github.com/kimimgo/viznoir)
+- [PyPI](https://pypi.org/project/mcp-server-viznoir/)
+- [Issues](https://github.com/kimimgo/viznoir/issues)

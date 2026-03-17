@@ -45,6 +45,62 @@ const ogImage = new URL('/viznoir/og-image.png', Astro.site);
       rel="stylesheet"
     />
 
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "SoftwareApplication",
+            "name": "viznoir",
+            "alternateName": "mcp-server-viznoir",
+            "description": "Cinema-quality science visualization for AI agents. An open-source MCP server providing 22 tools for headless VTK rendering, slicing, contouring, volume rendering, and animating CFD/FEA/SPH simulation data.",
+            "applicationCategory": "DeveloperApplication",
+            "applicationSubCategory": "Scientific Visualization",
+            "operatingSystem": "Linux, macOS, Windows",
+            "url": "https://kimimgo.github.io/viznoir/",
+            "downloadUrl": "https://pypi.org/project/mcp-server-viznoir/",
+            "installUrl": "https://pypi.org/project/mcp-server-viznoir/",
+            "softwareVersion": "0.7.0",
+            "license": "https://opensource.org/licenses/MIT",
+            "isAccessibleForFree": true,
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD"
+            },
+            "featureList": [
+              "22 MCP tools for simulation post-processing",
+              "Cinematic rendering with 3-point lighting, SSAO, FXAA, PBR",
+              "50+ input formats via VTK and meshio",
+              "Headless GPU rendering via EGL",
+              "CFD, FEA, SPH, medical, molecular domain support",
+              "Adaptive resolution: analyze, preview, publish",
+              "Autonomous inspect-plan-render-evaluate-refine loop"
+            ]
+          },
+          {
+            "@type": "SoftwareSourceCode",
+            "name": "viznoir",
+            "codeRepository": "https://github.com/kimimgo/viznoir",
+            "programmingLanguage": "Python",
+            "runtimePlatform": "Python 3.10+",
+            "license": "https://opensource.org/licenses/MIT",
+            "targetProduct": {
+              "@type": "SoftwareApplication",
+              "name": "viznoir"
+            }
+          },
+          {
+            "@type": "WebSite",
+            "name": "viznoir",
+            "url": "https://kimimgo.github.io/viznoir/",
+            "description": "Cinema-quality science visualization for AI agents"
+          }
+        ]
+      }
+    </script>
+
     <title>{title}</title>
   </head>
   <body class="min-h-screen bg-primary antialiased">
