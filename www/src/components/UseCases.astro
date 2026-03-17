@@ -1,0 +1,72 @@
+---
+const cases = [
+  {
+    domain: 'CFD Post-Processing',
+    keywords: 'OpenFOAM, CGNS, Fluent, pressure, velocity, streamlines, wall shear stress',
+    desc: 'Render pressure fields, velocity streamlines, and wall shear stress from OpenFOAM, Fluent, and CGNS cases. viznoir auto-detects CFD domains and applies appropriate colormaps and camera angles.',
+    example: '"Show pressure distribution on my OpenFOAM cavity case with cinematic lighting"',
+  },
+  {
+    domain: 'FEA Visualization',
+    keywords: 'Abaqus, Nastran, CalculiX, stress, displacement, von Mises, mode shapes',
+    desc: 'Visualize von Mises stress, displacement, and mode shapes from Abaqus, Nastran, and CalculiX results. Automatic deformation scaling and yield detection.',
+    example: '"Render von Mises stress on the cantilever beam with deformation overlay"',
+  },
+  {
+    domain: 'SPH / Particle Methods',
+    keywords: 'DualSPHysics, SPH, sloshing, particle visualization, free surface',
+    desc: 'Animate DualSPHysics particle data with velocity coloring, free surface extraction, and time-series comparison. Supports .bi4 native format.',
+    example: '"Animate the sloshing simulation colored by velocity magnitude"',
+  },
+  {
+    domain: 'Medical Imaging',
+    keywords: 'DICOM, NIfTI, CT scan, MRI, volume rendering, brain, organ',
+    desc: 'Volume render CT and MRI scans with clinically appropriate transfer functions. Supports VTI, DICOM, and NIfTI formats with 6 built-in presets.',
+    example: '"Volume render the brain phantom with bone-skin transparency preset"',
+  },
+  {
+    domain: 'Molecular Visualization',
+    keywords: 'PDB, protein structure, electron density, molecular surface',
+    desc: 'Render protein structures from PDB files with ball-and-stick or surface representations. Electron density maps as isosurfaces.',
+    example: '"Show the hemoglobin protein structure with electron density contour"',
+  },
+  {
+    domain: 'Geoscience & Climate',
+    keywords: 'NetCDF, seismic, ocean temperature, climate, SST, earthquake',
+    desc: 'Slice through seismic volumes, plot sea surface temperature from NetCDF, and visualize earthquake data with geographic projections.',
+    example: '"Slice the seismic volume at depth 2km and overlay earthquake locations"',
+  },
+];
+---
+
+<section class="relative py-24">
+  <div class="section-divider mb-24"></div>
+  <div class="max-w-6xl mx-auto px-6">
+
+    <div class="text-center mb-14 fade-up">
+      <span class="inline-block px-3 py-1 rounded-full bg-accent/10 text-accent text-xs font-mono font-medium tracking-wider mb-4">
+        USE CASES
+      </span>
+      <h2 class="text-3xl sm:text-4xl font-bold tracking-tight">
+        <span class="gradient-text-white">10 domains, one tool</span>
+      </h2>
+      <p class="text-sm text-text-secondary/50 mt-3 max-w-2xl mx-auto">
+        viznoir is an AI-powered MCP server for scientific visualization across engineering, medical, molecular, and geoscience domains.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 fade-up">
+      {cases.map((c) => (
+        <div class="card-hover p-5">
+          <h3 class="text-sm font-semibold text-text-primary mb-2">{c.domain}</h3>
+          <p class="text-xs text-text-secondary/60 leading-relaxed mb-3">{c.desc}</p>
+          <code class="block text-[10px] text-accent/50 font-mono bg-secondary/50 rounded px-2 py-1.5 leading-relaxed">
+            {c.example}
+          </code>
+          <p class="text-[9px] text-text-secondary/30 font-mono mt-2">{c.keywords}</p>
+        </div>
+      ))}
+    </div>
+
+  </div>
+</section>

@@ -1,0 +1,66 @@
+---
+const faqs = [
+  {
+    q: 'What is viznoir?',
+    a: 'viznoir is an open-source MCP (Model Context Protocol) server for scientific visualization. It connects AI coding assistants like Claude, Cursor, and Windsurf to VTK-powered headless rendering, enabling engineers and researchers to generate publication-quality visualizations of simulation data through natural language prompts instead of manual GUI workflows.',
+  },
+  {
+    q: 'What is an MCP server for scientific visualization?',
+    a: 'An MCP server for scientific visualization exposes visualization tools (rendering, slicing, contouring, animation) as structured API endpoints that AI models can call directly. viznoir is currently the only MCP server purpose-built for engineering simulation post-processing, supporting CFD, FEA, SPH, medical imaging, and molecular visualization.',
+  },
+  {
+    q: 'How does viznoir compare to ParaView?',
+    a: 'ParaView is a powerful open-source visualization application with a GUI and Python scripting (pvpython). viznoir uses VTK directly (the same rendering engine as ParaView) but is designed for AI agent workflows: headless EGL rendering, MCP protocol integration, automatic domain detection, and cinematic-quality output — all without installing ParaView or running a display server.',
+  },
+  {
+    q: 'Does viznoir replace VTK or ParaView?',
+    a: 'No. viznoir is built on VTK and provides an AI-friendly interface to VTK capabilities. It complements ParaView for automated, headless, AI-driven post-processing workflows. For interactive exploration, ParaView remains the standard. For batch processing and AI-driven analysis, viznoir adds prompt-based control.',
+  },
+  {
+    q: 'What simulation formats does viznoir support?',
+    a: 'viznoir supports 50+ file formats through VTK and meshio: OpenFOAM (.foam), CGNS, Fluent (.cas/.msh), Abaqus (.inp), Nastran (.bdf/.op2), DualSPHysics (.bi4), VTK/VTU/VTP, STL, OBJ, PLY, glTF, DICOM, NIfTI, NetCDF, PDB, and more. It auto-detects the simulation domain (CFD, FEA, SPH) and applies appropriate visualization settings.',
+  },
+  {
+    q: 'Can viznoir do CFD post-processing?',
+    a: 'Yes. viznoir provides specialized CFD post-processing capabilities: pressure and velocity field rendering, streamline visualization, wall shear stress mapping, boundary layer analysis, and vortex detection. It reads OpenFOAM, CGNS, and Fluent cases directly and auto-detects CFD-specific fields like p, U, k, epsilon, and nut.',
+  },
+  {
+    q: 'How does viznoir handle headless rendering?',
+    a: 'viznoir uses VTK with EGL (GPU) or OSMesa (CPU) for fully headless rendering — no X server, no display, no GUI needed. This makes it ideal for servers, CI/CD pipelines, Docker containers, and AI agent environments. A singleton render window is reused across requests and automatically recycled every 100 renders to prevent GPU memory leaks.',
+  },
+  {
+    q: 'What AI assistants work with viznoir?',
+    a: 'viznoir works with any MCP-compatible AI client: Claude Code, Claude Desktop, Cursor, Windsurf, Gemini CLI, and others. It exposes 22 tools through the standard Model Context Protocol, so any client that supports MCP can use viznoir for scientific visualization.',
+  },
+];
+---
+
+<section class="relative py-24">
+  <div class="section-divider mb-24"></div>
+  <div class="max-w-6xl mx-auto px-6">
+
+    <div class="text-center mb-14 fade-up">
+      <span class="inline-block px-3 py-1 rounded-full bg-accent/10 text-accent text-xs font-mono font-medium tracking-wider mb-4">
+        FAQ
+      </span>
+      <h2 class="text-3xl sm:text-4xl font-bold tracking-tight">
+        <span class="gradient-text-white">Frequently asked questions</span>
+      </h2>
+    </div>
+
+    <div class="max-w-3xl mx-auto space-y-4 fade-up">
+      {faqs.map((faq) => (
+        <details class="group card-hover">
+          <summary class="flex items-center justify-between cursor-pointer p-5">
+            <h3 class="text-sm font-semibold text-text-primary pr-4">{faq.q}</h3>
+            <span class="text-text-secondary/30 group-open:rotate-45 transition-transform text-lg shrink-0">+</span>
+          </summary>
+          <div class="px-5 pb-5 -mt-1">
+            <p class="text-xs text-text-secondary/60 leading-relaxed">{faq.a}</p>
+          </div>
+        </details>
+      ))}
+    </div>
+
+  </div>
+</section>

@@ -96,6 +96,51 @@ const ogImage = new URL('/viznoir/og-image.png', Astro.site);
             "name": "viznoir",
             "url": "https://kimimgo.github.io/viznoir/",
             "description": "Cinema-quality science visualization for AI agents"
+          },
+          {
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "What is viznoir?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "viznoir is an open-source MCP (Model Context Protocol) server for scientific visualization. It connects AI coding assistants like Claude, Cursor, and Windsurf to VTK-powered headless rendering, enabling engineers and researchers to generate publication-quality visualizations of simulation data through natural language prompts."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "What is an MCP server for scientific visualization?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "An MCP server for scientific visualization exposes visualization tools (rendering, slicing, contouring, animation) as structured API endpoints that AI models can call directly. viznoir is the only MCP server purpose-built for engineering simulation post-processing, supporting CFD, FEA, SPH, medical imaging, and molecular visualization."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How does viznoir compare to ParaView?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "ParaView is a powerful open-source visualization application with a GUI and Python scripting. viznoir uses VTK directly (the same rendering engine as ParaView) but is designed for AI agent workflows: headless EGL rendering, MCP protocol integration, automatic domain detection, and cinematic-quality output — all without installing ParaView or running a display server."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "What simulation formats does viznoir support?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "viznoir supports 50+ file formats through VTK and meshio: OpenFOAM (.foam), CGNS, Fluent (.cas/.msh), Abaqus (.inp), Nastran (.bdf/.op2), DualSPHysics (.bi4), VTK/VTU/VTP, STL, OBJ, PLY, glTF, DICOM, NIfTI, NetCDF, PDB, and more."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Can viznoir do CFD post-processing?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. viznoir provides specialized CFD post-processing: pressure and velocity field rendering, streamline visualization, wall shear stress mapping, boundary layer analysis, and vortex detection. It reads OpenFOAM, CGNS, and Fluent cases directly."
+                }
+              }
+            ]
           }
         ]
       }

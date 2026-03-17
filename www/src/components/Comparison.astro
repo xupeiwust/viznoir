@@ -1,0 +1,55 @@
+---
+const rows = [
+  { feature: 'AI agent integration', viznoir: 'Native MCP', paraview: 'pvpython scripts', pyvista: 'Python API' },
+  { feature: 'Setup', viznoir: 'pip install (1 line)', paraview: 'GUI download + Python config', pyvista: 'pip install' },
+  { feature: 'Headless rendering', viznoir: 'EGL built-in', paraview: 'pvserver + xvfb', pyvista: 'xvfb required' },
+  { feature: 'Cinematic quality', viznoir: '3-point lighting, SSAO, FXAA, PBR', paraview: 'OSPRay (separate)', pyvista: 'Basic lighting' },
+  { feature: 'Domain detection', viznoir: 'Auto (CFD/FEA/SPH)', paraview: 'Manual', pyvista: 'Manual' },
+  { feature: 'Natural language', viznoir: 'Prompt-driven', paraview: 'No', pyvista: 'No' },
+  { feature: 'File formats', viznoir: '50+ via VTK + meshio', paraview: '50+ native', pyvista: '20+ via VTK' },
+  { feature: 'License', viznoir: 'MIT', paraview: 'BSD-3', pyvista: 'MIT' },
+];
+---
+
+<section class="relative py-24">
+  <div class="section-divider mb-24"></div>
+  <div class="max-w-6xl mx-auto px-6">
+
+    <div class="text-center mb-14 fade-up">
+      <span class="inline-block px-3 py-1 rounded-full bg-accent/10 text-accent text-xs font-mono font-medium tracking-wider mb-4">
+        COMPARISON
+      </span>
+      <h2 class="text-3xl sm:text-4xl font-bold tracking-tight">
+        <span class="gradient-text-white">viznoir vs ParaView vs PyVista</span>
+      </h2>
+      <p class="text-sm text-text-secondary/50 mt-3 max-w-2xl mx-auto">
+        How does viznoir compare to traditional scientific visualization tools?
+        viznoir is the only tool purpose-built for AI agent workflows via MCP.
+      </p>
+    </div>
+
+    <div class="overflow-x-auto fade-up">
+      <table class="w-full text-sm border-collapse">
+        <thead>
+          <tr class="border-b border-border/50">
+            <th class="text-left py-3 px-4 text-text-secondary/50 font-mono text-xs">Feature</th>
+            <th class="text-left py-3 px-4 text-accent font-mono text-xs">viznoir</th>
+            <th class="text-left py-3 px-4 text-text-secondary/50 font-mono text-xs">ParaView</th>
+            <th class="text-left py-3 px-4 text-text-secondary/50 font-mono text-xs">PyVista</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr class="border-b border-border/20 hover:bg-secondary/20 transition-colors">
+              <td class="py-2.5 px-4 text-text-secondary/60 text-xs">{row.feature}</td>
+              <td class="py-2.5 px-4 text-text-primary text-xs font-medium">{row.viznoir}</td>
+              <td class="py-2.5 px-4 text-text-secondary/40 text-xs">{row.paraview}</td>
+              <td class="py-2.5 px-4 text-text-secondary/40 text-xs">{row.pyvista}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</section>
