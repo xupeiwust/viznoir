@@ -82,7 +82,7 @@ async def compose_assets_impl(
     elif layout == "grid":
         from viznoir.anim.compositor import render_grid_layout
 
-        cols = max(1, math.ceil(math.sqrt(len(images)))) if len(images) > 2 else len(images)
+        cols = max(1, math.ceil(math.sqrt(len(images)))) if len(images) > 2 else max(1, len(images))
         grid_labels = labels if any(labels) else None
         result_img = await loop.run_in_executor(
             None,

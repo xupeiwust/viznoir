@@ -126,6 +126,24 @@ class TestLabelTruncation:
         assert result.size == (1920, 1080)
 
 
+class TestLabelListMutation:
+    def test_story_does_not_mutate_caller_labels(self):
+        """render_story_layout must not append to the caller's labels list."""
+        assets = _make_assets(3)
+        labels = ["A", "B"]  # intentionally shorter than assets
+        original_len = len(labels)
+        render_story_layout(assets, labels, width=800, height=600)
+        assert len(labels) == original_len
+
+    def test_grid_does_not_mutate_caller_labels(self):
+        """render_grid_layout must not append to the caller's labels list."""
+        assets = _make_assets(4)
+        labels = ["X", "Y"]  # intentionally shorter than assets
+        original_len = len(labels)
+        render_grid_layout(assets, cols=2, width=800, height=600, labels=labels)
+        assert len(labels) == original_len
+
+
 class TestLabelPositioning:
     def test_labels_centered_horizontally(self):
         """Labels should be centered within their panel."""
