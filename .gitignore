@@ -30,3 +30,9 @@ scripts/launch/logs/
 .hypothesis/
 .mutmut-cache
 .worktrees/
+
+# Private / internal-only
+GEO-AUDIT-REPORT.md
+docs/geo/
+scripts/github-kpi-report.sh
+toro-test/
