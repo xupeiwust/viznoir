@@ -1,5 +1,4 @@
 """Tests for improved compositor layout engine (B-1)."""
-
 from __future__ import annotations
 
 from PIL import Image

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import math
 import os
 import uuid
 from pathlib import Path
@@ -81,9 +82,11 @@ async def compose_assets_impl(
     elif layout == "grid":
         from viznoir.anim.compositor import render_grid_layout
 
+        cols = max(1, math.ceil(math.sqrt(len(images)))) if len(images) > 2 else len(images)
+        grid_labels = labels if any(labels) else None
         result_img = await loop.run_in_executor(
             None,
-            lambda: render_grid_layout(images, cols=2, width=width, height=height),
+            lambda: render_grid_layout(images, cols=cols, width=width, height=height, labels=grid_labels),
         )
         filename = f"grid_{uuid.uuid4().hex[:8]}.png"
         save_path = out_path / filename

@@ -1,5 +1,4 @@
 """Tests for label visibility enhancement (B-3)."""
-
 from __future__ import annotations
 
 from PIL import Image, ImageDraw
@@ -138,7 +137,6 @@ class TestLabelPositioning:
     def test_slides_label_positioning(self):
         """Slides layout labels should also work correctly."""
         from viznoir.anim.compositor import render_slides_layout
-
         assets = _make_assets(2)
         labels = ["Slide 1", "Slide 2"]
         result = render_slides_layout(assets, labels, width=1920, height=1080)

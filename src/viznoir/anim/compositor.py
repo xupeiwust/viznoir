@@ -201,7 +201,8 @@ def render_story_layout(
     canvas = Image.new("RGBA", (width, height), BG_COLOR)
     draw = ImageDraw.Draw(canvas)
 
-    # Pad labels to match asset count
+    # Pad labels without mutating caller's list
+    labels = list(labels)
     while len(labels) < len(assets):
         labels.append("")
 
@@ -222,7 +223,7 @@ def render_story_layout(
     panel_w = max(1, (width - padding * (cols_per_row + 1)) // cols_per_row)
     panel_area_y = title_h + padding
     row_h = max(1, (height - panel_area_y - padding) // num_rows)
-    panel_area_h = row_h - label_h - padding
+    panel_area_h = max(1, row_h - label_h - padding)
 
     # Draw title
     if title:
@@ -313,14 +314,15 @@ def render_grid_layout(
     # Label area
     label_h = max(20, int(30 * height / 1080)) if labels is not None else 0
 
-    # Pad labels
+    # Pad labels without mutating caller's list
     if labels is not None:
+        labels = list(labels)
         while len(labels) < n:
             labels.append("")
 
     cell_w = max(1, (width - padding * (cols + 1)) // cols)
     cell_h = max(1, (height - padding * (rows + 1)) // rows)
-    asset_h = cell_h - label_h
+    asset_h = max(1, cell_h - label_h)
 
     draw = ImageDraw.Draw(canvas) if labels else None
     label_font = _get_scaled_font(16, width) if labels else None
