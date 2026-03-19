@@ -1,0 +1,35 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "com.github.kimimgo/viznoir",
+  "description": "Cinema-quality science visualization for AI agents. Headless VTK rendering pipeline via MCP — no ParaView GUI, no display server.",
+  "title": "viznoir",
+  "websiteUrl": "https://kimimgo.github.io/viznoir/",
+  "repository": {
+    "url": "https://github.com/kimimgo/viznoir",
+    "source": "github"
+  },
+  "version": "0.7.0",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "registryBaseUrl": "https://pypi.org",
+      "identifier": "mcp-server-viznoir",
+      "version": "0.7.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "VIZNOIR_RENDER_BACKEND",
+          "description": "Rendering backend: gpu, cpu, or auto",
+          "isRequired": false
+        },
+        {
+          "name": "VIZNOIR_OUTPUT_DIR",
+          "description": "Output directory for rendered images",
+          "isRequired": false
+        }
+      ]
+    }
+  ]
+}
