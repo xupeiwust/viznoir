@@ -30,6 +30,7 @@ scripts/launch/logs/
 .hypothesis/
 .mutmut-cache
 .worktrees/
+*.zip
 
 # Private / internal-only
 GEO-AUDIT-REPORT.md
