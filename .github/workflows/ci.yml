@@ -70,8 +70,8 @@ jobs:
             exit 1
           fi
           echo "Collected $COUNT tests"
-          if [ "$COUNT" -lt 1430 ]; then
-            echo "::error::Test count regression: $COUNT < 1430 (expected >= 1430)"
+          if [ "$COUNT" -lt 1650 ]; then
+            echo "::error::Test count regression: $COUNT < 1650 (expected >= 1650)"
             exit 1
           fi
 
