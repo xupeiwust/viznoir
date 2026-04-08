@@ -39,6 +39,7 @@ class ContextParserRegistry:
 def get_default_registry() -> ContextParserRegistry:
     """Create registry with built-in parsers (OpenFOAM first, Generic as fallback)."""
     from viznoir.context.cgns import CGNSContextParser
+    from viznoir.context.dualsphysics import DualSPHysicsContextParser
     from viznoir.context.generic import GenericContextParser
     from viznoir.context.openfoam import OpenFOAMContextParser
 
@@ -46,6 +47,7 @@ def get_default_registry() -> ContextParserRegistry:
     # Specific parsers first — checked in order, first match wins
     registry.register(OpenFOAMContextParser())
     registry.register(CGNSContextParser())
+    registry.register(DualSPHysicsContextParser())
     # Generic is fallback — always returns True for can_parse
     registry.register(GenericContextParser())
     return registry
