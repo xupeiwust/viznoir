@@ -58,6 +58,9 @@ _READER_MAP: dict[str, tuple[str, bool]] = {
     ".cas": ("vtkFLUENTReader", False),
     # EnSight
     ".case": ("vtkGenericEnSightReader", False),
+    # MRC/MAP (cryoEM, electron density)
+    ".mrc": ("vtkMRCReader", False),
+    ".map": ("vtkMRCReader", False),
     # XDMF
     ".xdmf": ("vtkXdmf3Reader", False),
     ".xmf": ("vtkXdmf3Reader", False),
